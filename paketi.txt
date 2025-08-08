@@ -1,0 +1,36 @@
+PAKETI ZA PROGRAM RAČUNOVODSTVO:
+
+- mysql-connector-python
+- fpdf
+- tkcalendar
+- pandas
+- openpyxl
+- xlsxwriter
+- cyrtranslit
+- PyPDF2
+
+Kada se pravi exe:
+
+hidden - babel.numbers
+
+VERZIJE:
+1.01
+1.02
+1.03 - 13.10.2022. Kreriran nalog, polja duguje i potrazuje - provera da li su uneta slova i da moze odmah da se sacuva ili azurira red bez pritiska na enter
+1.04 - 17.10.2022. U funkcijama Dodaj red i Izmeni red dodate su metode "proveri broj duguje" i "proveri broj potražuje" jer kada se pritisne dugme dodaj red
+		   ili izmeni red direktno bez prethodno pritisnutog entera, onda nije proveravao da li su float i menjao zarez u tačku.
+		   U prozoru Unos naloga - stavki naloga: izmenjeno je da se u polju Komentar proverava da li je uneta cirilica samo ako ima nesto uneto u to polje.
+		   U prozoru Unos naloga - stavki naloga: dodata provera ako se klikne na izmeni red ili obrisi red, a nije selektovano, da izadje poruka da nista nije odabrano
+1.05 - 21.06.2023. Ispravljena je greska kod prikaza izvestaja - jer GROUP BY je prikazivao gresku kod grupisanja po kontu. Dodao sam naziv nove kolone i po njoj grupisao podatke.
+1.06 - 17.08.2023. Ispravljena je greska kod backupa podataka - napravljena je relativna putanja, pa se sada podaci cuvaju u folderu Backup u okviru foldera Racunovodstvo
+1.2  - 05.02.2024. Promenjena je boja dugmadi i njihova pozicija (centrirani). Kod unosa i ispravki izvora finansiranja, uneta je kontrola kod brisanja (ako se izvor finansiranja
+                   nalazi u nekoj stavki naloga, ne može da se obriše). Dodat je izvestaj Glavna knjiga. Promenjen je izgled stampe dokumentacije.
+1.3  - 15.05.2024. Dodat je izvestaj Pomocna knjiga dobavljaca - koji moze da se stampa u ekselu. Za Zakljucni list je dodat eksport u excel.
+1.4  - 14.06.2024. Dodat je izvestaj Pomocna knjiga datih avansa - koja moze da se eksportuje u eksel.
+1.5  - 26.11.2024. Dodato je unosenje eFaktura u program i njihovo knjizenje kao dobavljaca. Dodata je tabela Dobavljaci koja sadrzi PIB i naziv dobavljaca. Kada se novi dobavljac
+		   unese u program, automatski se pravi konto 252111-naziv dobavljaca. Unos, azuriranje i brisanje dobavljaca se vrsi iz prozora Dobavljaci.
+                   Dodata je tabela eFakture, gde se cuvaju nazivi ucitanih eFaktura. Ovo ce se koristiti kada se budu mogle stamapati eFakture iz programa.
+1.6  - 06.12.2024. Dodato je dugme za otvaranje spiska ucitanih eFaktura u nalogu i mogucnost stampe tih eFaktura.
+1.7  - 11.12.2024. Ispravljena je greska, kada se proknjizi nalog, da dugme za unos eFaktura postane neaktivno. Pomocu PyPDF2 se kreiraju eFakture u PDF iz xml fajla sa svim
+                   prilozima. Izmenjen je bekap podataka, sada se kreira zip fajl sa podacima iz baze podataka i sadrzaj foldera eFakture.
+1.8  - 23.12.2024. Dodato je kada se uradi bekap podataka da se otvori prozor sa fajlovima gde se nalazi bekap.
