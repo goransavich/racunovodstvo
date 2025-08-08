@@ -115,9 +115,9 @@ class Sistem:
         database = 'racunovodstvo'
         now = datetime.now()
         danasnji_datum = now.strftime("%m%d%Y%H%M%S")
-        #naziv_snimljene_baze = "C:\\Users\\PC\\Desktop\\backup"+danasnji_datum+".sql"
+        # naziv_snimljene_baze = "C:\\Users\\PC\\Desktop\\backup"+danasnji_datum+".sql"
         dump_file = 'baza_podataka.sql'
-        #naziv_snimljene_baze = ".\\backup\\sacuvano_" + danasnji_datum + ".sql"
+        # naziv_snimljene_baze = ".\\backup\\sacuvano_" + danasnji_datum + ".sql"
         naziv_snimljene_baze = ".\\sacuvano\\sacuvano_finansije" + danasnji_datum + ".zip"
         try:
             subprocess.run(
@@ -258,7 +258,7 @@ class Sistem:
         self.naziv_organizacije_label.grid(row=0, column=0, padx=10, pady=10, sticky='w')
         self.naziv_organizacije_entry = Entry(self.entry_polja_organizacija)
         self.naziv_organizacije_entry.grid(row=0, column=1, padx=10, pady=10, sticky='ew')
-        #self.naziv_entry_nalog.bind("<KeyRelease>", self.__proveri_jezik)
+        # self.naziv_entry_nalog.bind("<KeyRelease>", self.__proveri_jezik)
 
         # Label i polje za unos JBKJS
         self.jbkjs_label = Label(self.entry_polja_organizacija, text="JBKJS:")
@@ -326,6 +326,26 @@ class Sistem:
         self.prozor_sistem.columnconfigure(0, weight=1)
         self.prozor_sistem.rowconfigure(0, weight=1)
 
+        self.prozor_podaci_organizacija = None
+        self.entry_polja_organizacija = None
+        self.naziv_organizacije_label = None
+        self.naziv_organizacije_entry = None
+        self.jbkjs_label = None
+        self.jbkjs_entry = None
+        self.program_label = None
+        self.program_entry = None
+        self.projekat_entry = None
+        self.projekat_label = None
+        self.funkcionalna_entry = None
+        self.funkcionalna_label = None
+        self.valuta_entry = None
+        self.valuta_label = None
+        self.racunovodja_entry = None
+        self.racunovodja_label = None
+        self.polje_dugmad_organizacija = None
+        self.dugme_dodaj_organizaciju = None
+        self.dugme_izmeni_organizaciju = None
+
         self.notebook = ttk.Notebook(self.prozor_sistem)
         self.notebook.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')
 
@@ -355,8 +375,7 @@ class Sistem:
         self.entry_prebacivanje_pocetnog = ttk.Combobox(self.tab_prebacivanje_pocetnog_stanja)
         self.entry_prebacivanje_pocetnog.grid(row=0, column=1, padx=10, pady=10, sticky='ew')
         self.ucitavanje_godina_combo()
-        self.button_prebacivanje_pocetnog = Button(self.tab_prebacivanje_pocetnog_stanja, text="Potvrdi prenos početnog stanja",
-                                              command=self.prebacivanje_pocetnog)
+        self.button_prebacivanje_pocetnog = Button(self.tab_prebacivanje_pocetnog_stanja, text="Potvrdi prenos početnog stanja", command=self.prebacivanje_pocetnog)
         self.button_prebacivanje_pocetnog.grid(row=0, column=2, padx=10, pady=10, sticky='w')
 
         # ************************************* Tab 3 Unos novog korisnika ********************************* #
