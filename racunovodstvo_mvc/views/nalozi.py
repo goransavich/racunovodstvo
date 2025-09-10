@@ -13,6 +13,7 @@ from racunovodstvo_mvc.controllers.KontoController import KontoController
 from racunovodstvo_mvc.controllers.DimenzijeProzora import DimenzijeProzora
 from racunovodstvo_mvc.controllers.DobavljacController import DobavljacController
 from racunovodstvo_mvc.controllers.EfakturaController import EfakturaController
+from racunovodstvo_mvc.controllers.OrisController import OrisController
 from tkcalendar import DateEntry
 from datetime import date
 import webbrowser
@@ -184,7 +185,9 @@ class Nalozi:
         # Pronalazenje godine koja je aktivna - trenutna godina na vrhu ekrana
         self.aktivna_godina = aktivna_godina
         conn_nalozi = NaloziController()
-        data = conn_nalozi.read(self.aktivna_godina)
+        # data = conn_nalozi.read(self.aktivna_godina) OVO JE BILO PRVOBITNO BEZ ORIS
+        # OVO JE NOVO SA ORISOM NA POCETNOJ STRANICI
+        data = conn_nalozi.read_nalozi_oris(self.aktivna_godina)
 
         self.my_tree.tag_configure('oddrow', background="white")
         self.my_tree.tag_configure('evenrow', background="lightblue")
@@ -195,20 +198,20 @@ class Nalozi:
             if count_nalozi_glavni_prozor % 2 == 0:
                 if record[4] == 'da':
                     self.my_tree.insert(parent='', index='end', iid=record[0], text='', values=(
-                                    count_nalozi_glavni_prozor, record[3], record[1], record[2].strftime("%d.%m.%Y"), record[4]),
+                                    count_nalozi_glavni_prozor, record[3], record[1], record[2].strftime("%d.%m.%Y"), record[4], record[5]),
                                     tags=('evenrow',))
                 else:
                     self.my_tree.insert(parent='', index='end', iid=record[0], text='', values=(
-                        count_nalozi_glavni_prozor, record[3], record[1], record[2].strftime("%d.%m.%Y"), record[4]),
+                        count_nalozi_glavni_prozor, record[3], record[1], record[2].strftime("%d.%m.%Y"), record[4], record[5]),
                                         tags=('neproknjizen',))
             else:
                 if record[4] == 'da':
                     self.my_tree.insert(parent='', index='end', iid=record[0], text='', values=(
-                                    count_nalozi_glavni_prozor, record[3], record[1], record[2].strftime("%d.%m.%Y"), record[4]),
+                                    count_nalozi_glavni_prozor, record[3], record[1], record[2].strftime("%d.%m.%Y"), record[4], record[5]),
                                     tags=('oddrow',))
                 else:
                     self.my_tree.insert(parent='', index='end', iid=record[0], text='', values=(
-                        count_nalozi_glavni_prozor, record[3], record[1], record[2].strftime("%d.%m.%Y"), record[4]),
+                        count_nalozi_glavni_prozor, record[3], record[1], record[2].strftime("%d.%m.%Y"), record[4], record[5]),
                                         tags=('neproknjizen',))
             count_nalozi_glavni_prozor += 1
 
@@ -1148,6 +1151,57 @@ class Nalozi:
             messagebox.showwarning("Greška", "Hmmmm niste odabrali ni jednu eFakturu!",
                                    parent=self.prozor_ucitane_efakture)
 
+    def kreiraj_oris(self):
+        # Pronalazenje ID naloga na osnovu klika
+        selected = self.my_tree.focus()
+        # Pronadji nalog po ID-u
+        if selected:
+            conn_pronadji = NaloziController()
+            pronadjen_nalog = conn_pronadji.find_nalog(selected)
+            # Provera da li je nalog proknjizen. Ako nije ide poruka da ne moze da se formira ORIS, a ako jeste, napraviti ORIS fajl
+            if pronadjen_nalog[0][3] == 'ne':
+                messagebox.showwarning("Greška", "Nalog nije proknjižen. Ne možete da formirate ORIS!", parent=self.master)
+            else:
+                oris_controller = OrisController()
+                # Treba proveriti da li je vec ORIS formiran
+                provera = oris_controller.formiran_nalog_oris(selected)
+                if provera == 1:
+                    messagebox.showwarning("Hmmmmm", "Ovaj nalog već ima formiran ORIS fajl!", parent=self.master)
+                else:
+                    # Prvo unesi podatke u tabelu ORIS
+                    datum_naloga = pronadjen_nalog[0][1]
+                    godina_int = datum_naloga.year
+                    mesec_int = datum_naloga.month
+                    dan_int = datum_naloga.day
+                    # ovde se proverava da li je mesec jednocifren ili dvocifren
+                    if len(str(mesec_int)) == 1:
+                        mesec = '0' + str(mesec_int)
+                    else:
+                        mesec = str(mesec_int)
+                    # ovde se proverava da li je dan jednocifren ili dvocifren
+                    if len(str(dan_int)) == 1:
+                        dan = '0' + str(dan_int)
+                    else:
+                        dan = str(dan_int)
+                    broj_orisa = str(godina_int) + "-" + mesec + "-" + dan
+
+                    # OVDE PROVERITI DA LI POSTOJI OVAKAV BROJ ORISA
+
+                    try:
+                        oris_controller.unesi(selected, broj_orisa)
+                    except Error as e:
+                        messagebox.showwarning("Greška", "Hmmmmm, nešto nije u redu sa formiranjem ORIS fajla!", parent=self.master)
+                    # Drugo formiraj ORIS fajl
+
+                    # Trece ponovo ucitaj pocetnu tabelu sa nalozima
+                    self.svi_nalozi(datum_naloga.year)
+
+        else:
+            messagebox.showwarning("Greška", "Hmmmmm, niste izabrali ni jedan nalog!", parent=self.master)
+
+
+
+
     def ucitane_efakture(self):
         self.prozor_ucitane_efakture = Toplevel()
         # self.prozor_ucitane_efakture.attributes('-topmost', 'true')
@@ -1562,13 +1616,14 @@ class Nalozi:
 
         self.my_tree = ttk.Treeview(self.canvas_pregled_naloga)
         self.my_tree.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
-        self.my_tree['columns'] = ("R.broj", "Vrsta naloga", "Broj", "Datum", "Proknjižen")
+        self.my_tree['columns'] = ("R.broj", "Vrsta naloga", "Broj", "Datum", "Proknjižen", "Formiran ORIS")
         self.my_tree.column("#0", width=0, stretch=False)
         self.my_tree.column("R.broj", anchor=tk.CENTER, width=40)
         self.my_tree.column("Vrsta naloga", anchor=tk.CENTER, minwidth=150)
         self.my_tree.column("Broj", anchor=tk.CENTER, minwidth=100)
         self.my_tree.column("Datum", anchor=tk.CENTER, minwidth=150)
         self.my_tree.column("Proknjižen", anchor=tk.CENTER, width=50)
+        self.my_tree.column("Formiran ORIS", anchor=tk.CENTER, width=50)
 
         self.treeScroll = ttk.Scrollbar(self.canvas_pregled_naloga)
         self.treeScroll.grid(row=0, column=1, sticky='ns')
@@ -1581,6 +1636,7 @@ class Nalozi:
         self.my_tree.heading("Broj", anchor=tk.CENTER, text="Broj")
         self.my_tree.heading("Datum", anchor=tk.CENTER, text="Datum")
         self.my_tree.heading("Proknjižen", anchor=tk.CENTER, text="Proknjižen")
+        self.my_tree.heading("Formiran ORIS", anchor=tk.CENTER, text="Formiran ORIS")
 
         # Prikaz svih naloga iz aktivne godine
         self.svi_nalozi(godina)
@@ -1591,5 +1647,5 @@ class Nalozi:
         self.dugme_pregledaj.grid(row=0, column=0, padx=(1, 1), pady=10)
         self.dugme_obrisi = Button(self.buttons_frame, text="   Obriši nalog   ", command=self.poruka_brisanje, bg="#FF6868", fg="white")
         self.dugme_obrisi.grid(row=0, column=1, pady=10)
-        self.dugme_formiraj_oris = Button(self.buttons_frame, text="Formiraj ORIS fajl", bg="#FFCF81", fg="black")
-        self.dugme_formiraj_oris.grid(row=0, column=2, pady=10)
+        self.dugme_formiraj_oris = Button(self.buttons_frame, text="Formiraj ORIS fajl", bg="#FFCF81", fg="black", command=self.kreiraj_oris)
+        self.dugme_formiraj_oris.grid(row=0, column=2, padx=(1, 1), pady=10)

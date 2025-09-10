@@ -38,6 +38,19 @@ class Database:
       self.con.close()
       return rezultat
 
+   # OVO SE KORISTI NA POCETNOJ STRANI GDE SU IZLISTANI SVI NALOZI - DODATO ZBOG TOGA DA SE VIDI DA LI JE NALOG PREDAT U ORIS
+   def select_where_case(self, tablename, select_columns, condition, value, case_uslov, left_join, order=None):
+      if (order==None):
+         query_select = "SELECT {1} {4} from {0} LEFT JOIN {5} WHERE {2} = '{3}'".format(tablename, select_columns, condition, value, case_uslov, left_join)
+      else:
+         query_select = "SELECT {1} {4} from {0} LEFT JOIN {5} WHERE {2} = '{3}' ORDER by {6} ASC".format(tablename, select_columns, condition, value, case_uslov, left_join, order)
+      cursor = self.con.cursor()
+      cursor.execute(query_select)
+      rezultat = cursor.fetchall()
+      cursor.close()
+      self.con.close()
+      return rezultat
+
    def select_count(self, tablename, where_column, value, where_column2=None, value2=None):
       if (where_column2==None):
          query_select_count = "SELECT COUNT(*) FROM {0} WHERE {1} = '{2}'".format(tablename, where_column, value)
@@ -130,6 +143,14 @@ class Database:
       self.con.close()
       return rezultat
 
+   def select_exists_where(self, tablename, where_column, value):
+      query_select = "SELECT EXISTS(SELECT 1 FROM {0} WHERE {1}='{2}') AS postoji".format(tablename, where_column, value)
+      cursor = self.con.cursor()
+      cursor.execute(query_select)
+      rezultat = cursor.fetchall()
+      cursor.close()
+      self.con.close()
+      return rezultat
    def select_like(self, tablename, condition, value):
       query_select = "SELECT * FROM {0} WHERE {1} LIKE '{2}%' ".format(tablename, condition, value)
       cursor = self.con.cursor()

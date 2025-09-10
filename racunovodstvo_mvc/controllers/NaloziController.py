@@ -21,7 +21,6 @@ class NaloziController:
                 return False
             else:
                 return True
-
         except Error as e:
             Greske("Hmmmm, neka greška prilikom povezivanja na bazu podataka! provera da li postoji nalog - NaloziController", e)
 
@@ -34,6 +33,20 @@ class NaloziController:
             order = "datum"
             connection = Database()
             sve_stavke = connection.select_where(self.tablename, select_columns, condition, value, order)
+            return sve_stavke
+        except Error as e:
+            Greske("Pronalazenje u bazi spiska naloga sa podacima BEZ duguje potrazuje, i da li je proknjizen - ovo ide u tabelu na naslovnu stranu za trenutnu radnu godinu- NaloziController ", e)
+
+    def read_nalozi_oris(self, godina):
+        try:
+            select_columns = "nalog.nalogID, nalog.broj, nalog.datum, nalog.vrsta, nalog.proknjizen, "
+            case_uslov = "CASE WHEN oris.nalog_id IS NOT NULL THEN oris.broj_oris ELSE 'ne' END as formiran_oris"
+            left_join = "oris ON oris.nalog_id=nalog.nalogID"
+            condition = "EXTRACT(YEAR FROM datum)"
+            value = godina
+            order = "datum"
+            connection = Database()
+            sve_stavke = connection.select_where_case(self.tablename, select_columns, condition, value, case_uslov, left_join, order)
             return sve_stavke
         except Error as e:
             Greske("Pronalazenje u bazi spiska naloga sa podacima BEZ duguje potrazuje, i da li je proknjizen - ovo ide u tabelu na naslovnu stranu za trenutnu radnu godinu- NaloziController ", e)
