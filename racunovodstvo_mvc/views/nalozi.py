@@ -14,6 +14,7 @@ from racunovodstvo_mvc.controllers.DimenzijeProzora import DimenzijeProzora
 from racunovodstvo_mvc.controllers.DobavljacController import DobavljacController
 from racunovodstvo_mvc.controllers.EfakturaController import EfakturaController
 from racunovodstvo_mvc.controllers.OrisController import OrisController
+from racunovodstvo_mvc.controllers.KorisnikController import KorisnikController
 from tkcalendar import DateEntry
 from datetime import date
 import webbrowser
@@ -1168,7 +1169,7 @@ class Nalozi:
                 if provera == 1:
                     messagebox.showwarning("Hmmmmm", "Ovaj nalog već ima formiran ORIS fajl!", parent=self.master)
                 else:
-                    # Prvo unesi podatke u tabelu ORIS
+                    # PRVO UNESI PODATKE U TABELU ORIS
                     datum_naloga = pronadjen_nalog[0][1]
                     godina_int = datum_naloga.year
                     mesec_int = datum_naloga.month
@@ -1183,19 +1184,45 @@ class Nalozi:
                         dan = '0' + str(dan_int)
                     else:
                         dan = str(dan_int)
-                    broj_orisa = str(godina_int) + "-" + mesec + "-" + dan
 
-                    # OVDE PROVERITI DA LI POSTOJI OVAKAV BROJ ORISA
+                    broj_orisa = str(godina_int) + "-" + mesec + "-" + dan
+                    # OVDE PROVERITI DA LI POSTOJI OVAKAV BROJ ORISA U TABELI
+                    broj_za_proveru = broj_orisa[:10]
+                    provera_broja_orisa = oris_controller.postoji_broj_u_orisu(broj_za_proveru)
+                    ukupan_broj_orisa_na_dan = len(provera_broja_orisa)
+
+                    if ukupan_broj_orisa_na_dan >= 9:
+                        broj_orisa_konacan = broj_orisa + "-" + str(ukupan_broj_orisa_na_dan + 1)
+                    else:
+                        broj_orisa_konacan = broj_orisa + "-0" + str(ukupan_broj_orisa_na_dan + 1)
 
                     try:
-                        oris_controller.unesi(selected, broj_orisa)
+                        oris_controller.unesi(selected, broj_orisa_konacan)
+                        # DRUGO FORMIRAJ ORIS FAJL
+                        # ucitavam podatke o siframa projekta, okruga ...
+                        korisnik_controller = KorisnikController()
+                        sifre = korisnik_controller.read()
+                        xjbkjs = sifre[0][3]
+                        xsifra_programa = sifre[0][4]
+                        xsifra_projekta = sifre[0][5]
+                        xsifra_funkcionalne = sifre[0][6]
+                        xsifra_valute = int(sifre[0][7])
+
+                        # ucitavam podatke sa proknjizenog naloga - konto (6 cifara), iznos duguje, iznos potrazuje, datum kreiranja naloga, datum knjizenja naloga
+
+                        # Ovde su podaci o nalogu - datum
+                        nalog_controller = NaloziController()
+                        pronadjen_nalog_podaci = nalog_controller.find_nalog(selected)
+                        print(pronadjen_nalog_podaci)
+                        # Ovde su podaci o stavkama naloga
+                        stavke_controller = StavkaNalogaController()
+                        pronadjene_stavke_naloga = stavke_controller.find_stavke(selected)
+                        print(pronadjene_stavke_naloga)
+
+                        # Trece ponovo ucitaj pocetnu tabelu sa nalozima
+                        self.svi_nalozi(datum_naloga.year)
                     except Error as e:
                         messagebox.showwarning("Greška", "Hmmmmm, nešto nije u redu sa formiranjem ORIS fajla!", parent=self.master)
-                    # Drugo formiraj ORIS fajl
-
-                    # Trece ponovo ucitaj pocetnu tabelu sa nalozima
-                    self.svi_nalozi(datum_naloga.year)
-
         else:
             messagebox.showwarning("Greška", "Hmmmmm, niste izabrali ni jedan nalog!", parent=self.master)
 

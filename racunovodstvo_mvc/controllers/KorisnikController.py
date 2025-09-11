@@ -7,6 +7,15 @@ class KorisnikController:
 
     tablename = "korisnik"
 
+    def read(self):
+        try:
+            connection = Database()
+            select_columns = "*"
+            svi_podaci = connection.select(self.tablename, select_columns)
+            return svi_podaci
+        except Error as e:
+            Greske("Greska citanje svih podataka o okrugu - KorisnikController", e)
+
     def find(self, id_korisnika):
         try:
             select_columns = "*"

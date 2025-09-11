@@ -24,3 +24,15 @@ class OrisController:
             return rezultat[0][0]
         except Error as e:
             Greske("Hmmmm, neka greška prilikom povezivanja na bazu podataka! provera da li je formiran ORIS od trazenog naloga - OrisController.formiran_nalog_oris", e)
+
+    # Ovde se proverava da li postoji broj oris dokumenta u tabeli (na jedan dan moze da bude vise istih brojeva koji se razlikuju po poslednjoj cifri)
+    def postoji_broj_u_orisu(self, broj):
+        try:
+            select_columns = "*"
+            where_columns = "LEFT (broj_oris, 10)"
+            value = broj
+            connection = Database()
+            pronadjen_nalog = connection.select_where(self.tablename, select_columns, where_columns, value)
+            return pronadjen_nalog
+        except Error as e:
+            Greske("Pronalazenje u bazi naloga pomocu broja orisa - OrisController.postoji_broj_u_orisu ", e)

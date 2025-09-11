@@ -105,7 +105,6 @@ class NaloziController:
             Greske(
                 "Hmmmm, neka greška prilikom povezivanja na bazu podataka! provera da li postoji nalog - NaloziController", e)
 
-    # Pronalazenje u bazi spiska naloga sa podacima BEZ duguje potrazuje, i da li je proknjizen - ovo ide u tabelu na naslovnu stranu za trenutnu radnu godinu
     def read_dnevnik_knjizenja(self, pocetna, krajnja):
         try:
             select_columns = "nalog.broj, nalog.datum, nalog.vrsta, konto.oznaka, konto.naziv, stavke_naloga.iznos, stavke_naloga.status_dp"
@@ -118,4 +117,4 @@ class NaloziController:
             sve_stavke = connection.select_where_join(select_columns, table, join1, join2, condition, order)
             return sve_stavke
         except Error as e:
-            Greske("Pronalazenje u bazi spiska naloga za dnevnik knjizenja- NaloziController ", e)
+            Greske("Pronalazenje u bazi spiska naloga za dnevnik knjizenja- NaloziController.read_dnevnik_knjizenja", e)
