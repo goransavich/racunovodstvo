@@ -40,6 +40,43 @@ class NaloziController:
     def read_nalozi_oris(self, godina):
         try:
             select_columns = "nalog.nalogID, nalog.broj, nalog.datum, nalog.vrsta, nalog.proknjizen, "
+            case_uslov = "CASE WHEN nalog.oris_id IS NOT NULL THEN oris.broj_oris ELSE 'ne' END as formiran_oris"
+            left_join = "oris ON nalog.oris_id=oris.idoris"
+            condition = "EXTRACT(YEAR FROM datum)"
+            value = godina
+            order = "datum"
+            connection = Database()
+            sve_stavke = connection.select_where_case(self.tablename, select_columns, condition, value, case_uslov,
+                                                      left_join, order)
+            return sve_stavke
+        except Error as e:
+            Greske(
+                "Pronalazenje u bazi spiska naloga sa podacima BEZ duguje potrazuje, i da li je proknjizen - ovo ide u tabelu na naslovnu stranu za trenutnu radnu godinu- NaloziController ",
+                e)
+
+    def read_nalozi_pravljenje_oris(self, godina):
+        try:
+            select_columns = "nalog.nalogID, nalog.datum, nalog.datum_knjizenja"
+            condition1 = "EXTRACT(YEAR FROM datum)"
+            value1 = godina
+            condition2 = "nalog.proknjizen"
+            value2 = "da"
+            condition3 = "oris_id"
+            value3 = "IS NULL"
+            order = "datum"
+            connection = Database()
+            sve_stavke = connection.select_three_where(self.tablename, select_columns, condition1, value1, condition2, value2, condition3, value3, order)
+            return sve_stavke
+        except Error as e:
+            Greske(
+                "Pronalazenje u bazi spiska naloga sa podacima BEZ duguje potrazuje, i da li je proknjizen - ovo ide u tabelu na naslovnu stranu za trenutnu radnu godinu- NaloziController ",
+                e)
+
+
+    '''
+    def read_nalozi_oris(self, godina):
+        try:
+            select_columns = "nalog.nalogID, nalog.broj, nalog.datum, nalog.vrsta, nalog.proknjizen, "
             case_uslov = "CASE WHEN oris.nalog_id IS NOT NULL THEN oris.broj_oris ELSE 'ne' END as formiran_oris"
             left_join = "oris ON oris.nalog_id=nalog.nalogID"
             condition = "EXTRACT(YEAR FROM datum)"
@@ -50,7 +87,7 @@ class NaloziController:
             return sve_stavke
         except Error as e:
             Greske("Pronalazenje u bazi spiska naloga sa podacima BEZ duguje potrazuje, i da li je proknjizen - ovo ide u tabelu na naslovnu stranu za trenutnu radnu godinu- NaloziController ", e)
-
+    '''
     # pronalazenje u bazi naloga pomocu ID kako bi se uzeli podaci za taj nalog i stavke naloga koje se unose u njega
     def find_nalog(self, id_naloga):
         try:
@@ -118,3 +155,13 @@ class NaloziController:
             return sve_stavke
         except Error as e:
             Greske("Pronalazenje u bazi spiska naloga za dnevnik knjizenja- NaloziController.read_dnevnik_knjizenja", e)
+
+    def update_nalog_oris(self, id_naloga, id_orisa):
+        # Ažuriranje baze podataka
+        try:
+            set_condition = 'oris_id="{}"'.format(id_orisa)
+            filter_condition = 'nalogID={}'.format(id_naloga)
+            connection = Database()
+            connection.update(self.tablename, set_condition, filter_condition)
+        except Error as e:
+            Greske("Greska prilikom azuriranje naloga, unosa id orisa - NaloziController.update_nalog_oris", e)

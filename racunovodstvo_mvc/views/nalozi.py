@@ -1152,7 +1152,73 @@ class Nalozi:
             messagebox.showwarning("Greška", "Hmmmm niste odabrali ni jednu eFakturu!",
                                    parent=self.prozor_ucitane_efakture)
 
+    @staticmethod
+    def formiraj_broj_orisa():
+        # dobijanje danasnjeg dana - pomocu njega se formira broj orisa
+        datum_naloga = date.today()
+        # datum_naloga = pronadjen_nalog[0][1]
+        godina_int = datum_naloga.year
+        mesec_int = datum_naloga.month
+        dan_int = datum_naloga.day
+        # ovde se proverava da li je mesec jednocifren ili dvocifren
+        if len(str(mesec_int)) == 1:
+            mesec = '0' + str(mesec_int)
+        else:
+            mesec = str(mesec_int)
+        # ovde se proverava da li je dan jednocifren ili dvocifren
+        if len(str(dan_int)) == 1:
+            dan = '0' + str(dan_int)
+        else:
+            dan = str(dan_int)
+
+        broj_orisa = str(godina_int) + "-" + mesec + "-" + dan
+        # OVDE PROVERITI DA LI POSTOJI OVAKAV BROJ ORISA U TABELI
+        broj_za_proveru = broj_orisa[:10]
+        oris_controller = OrisController()
+        provera_broja_orisa = oris_controller.postoji_broj_u_orisu(broj_za_proveru)
+        ukupan_broj_orisa_na_dan = len(provera_broja_orisa)
+
+        if ukupan_broj_orisa_na_dan >= 9:
+            broj_orisa_konacan = broj_orisa + "-" + str(ukupan_broj_orisa_na_dan + 1)
+        else:
+            broj_orisa_konacan = broj_orisa + "-0" + str(ukupan_broj_orisa_na_dan + 1)
+
+        return broj_orisa_konacan
+
     def kreiraj_oris(self):
+        # PRVO PROVERITI DA LI POSTOJE PROKNJIZENI NALOZI U TEKUCOJ GODINI KOJI NEMAJU ORIS_ID (proknjizen = da AND oris_id is null)
+        # ako nema takvih naloga - znaci da ne treba da se formira ORIS
+        nalozi_controller = NaloziController()
+        nalozi_koji_nisu_u_orisu = nalozi_controller.read_nalozi_pravljenje_oris(self.aktivna_godina)
+        if not nalozi_koji_nisu_u_orisu:
+            messagebox.showwarning("Hmmmmm", "Nemate ni jedan nalog za slanje u ORIS!", parent=self.master)
+        # a ako ima
+        else:
+            # dodati red u ORIS tabelu - oris id, broj orisa
+            broj_orisa = self.formiraj_broj_orisa()
+            oris_controller = OrisController()
+            try:
+                oris_controller.unesi(broj_orisa)
+                poslednji_oris = oris_controller.pronadji_poslednji_oris()
+                id_poslednjeg_orisa = poslednji_oris[0][0]
+                # PRONADJI SVE NALOGE IZ TEKUCE GODINE KOJI SU PROKNJIZENI I NEMAJU ORIS_ID
+                for nalog in nalozi_koji_nisu_u_orisu:
+                    # azuriraj polje oris_id u svakom nalogu
+                    nalozi_controller.update_nalog_oris(nalog[0], id_poslednjeg_orisa)
+
+                    # Proci kroz svaki nalog, uzeti potrebne podatke (datum naloga) i iskoristiti ID naloga pa proci kroz svaku stavku naloga i uzeti podatke
+                    # na osnovu ovoga formirati CSV fajl
+
+                # ponovo ucitaj pocetnu tabelu sa nalozima
+                self.svi_nalozi(self.aktivna_godina)
+            except Error as e:
+                messagebox.showwarning("Hmmmmm", "Nešto nije u redu sa formiranjem ORIS fajla!", parent=self.master)
+
+
+
+
+
+        '''
         # Pronalazenje ID naloga na osnovu klika
         selected = self.my_tree.focus()
         # Pronadji nalog po ID-u
@@ -1170,7 +1236,9 @@ class Nalozi:
                     messagebox.showwarning("Hmmmmm", "Ovaj nalog već ima formiran ORIS fajl!", parent=self.master)
                 else:
                     # PRVO UNESI PODATKE U TABELU ORIS
-                    datum_naloga = pronadjen_nalog[0][1]
+                    # dobijanje danasnjeg dana - pomocu njega se formira broj orisa
+                    datum_naloga = date.today()
+                    #datum_naloga = pronadjen_nalog[0][1]
                     godina_int = datum_naloga.year
                     mesec_int = datum_naloga.month
                     dan_int = datum_naloga.day
@@ -1209,7 +1277,7 @@ class Nalozi:
                         xsifra_valute = int(sifre[0][7])
 
                         # ucitavam podatke sa proknjizenog naloga - konto (6 cifara), iznos duguje, iznos potrazuje, datum kreiranja naloga, datum knjizenja naloga
-
+                        #print(self.aktivna_godina)
                         # Ovde su podaci o nalogu - datum
                         nalog_controller = NaloziController()
                         pronadjen_nalog_podaci = nalog_controller.find_nalog(selected)
@@ -1226,7 +1294,7 @@ class Nalozi:
         else:
             messagebox.showwarning("Greška", "Hmmmmm, niste izabrali ni jedan nalog!", parent=self.master)
 
-
+        '''
 
 
     def ucitane_efakture(self):

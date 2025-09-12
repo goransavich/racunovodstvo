@@ -5,11 +5,11 @@ from racunovodstvo_mvc.views.greske import Greske
 class OrisController:
     tablename = "oris"
 
-    def unesi(self, id_naloga, broj_orisa):
+    def unesi(self, broj_orisa):
         # Unos formiranog orisa u tabelu
         try:
-            schema = "nalog_id, broj_oris"
-            value = (id_naloga, broj_orisa)
+            schema = "broj_oris"
+            value = (broj_orisa, )
             connection = Database()
             connection.insert(self.tablename, schema, value)
         except Error as e:
@@ -36,3 +36,13 @@ class OrisController:
             return pronadjen_nalog
         except Error as e:
             Greske("Pronalazenje u bazi naloga pomocu broja orisa - OrisController.postoji_broj_u_orisu ", e)
+
+    def pronadji_poslednji_oris(self):
+        try:
+            select_columns = "*"
+            order_by = "idoris"
+            connection = Database()
+            pronadjen_nalog = connection.select_last_row(self.tablename, select_columns, order_by)
+            return pronadjen_nalog
+        except Error as e:
+            Greske("Pronalazenje poslednjeg unetog orisa u tabelu - OrisController.pronadji_poslednji_oris", e)
