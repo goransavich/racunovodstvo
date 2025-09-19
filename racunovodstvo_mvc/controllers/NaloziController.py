@@ -56,7 +56,7 @@ class NaloziController:
 
     def read_nalozi_pravljenje_oris(self, godina):
         try:
-            select_columns = "nalog.nalogID, nalog.datum, nalog.datum_knjizenja"
+            select_columns = "nalog.nalogID, nalog.datum, nalog.datum_knjizenja, nalog.broj"
             condition1 = "EXTRACT(YEAR FROM datum)"
             value1 = godina
             condition2 = "nalog.proknjizen"

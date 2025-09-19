@@ -28,6 +28,9 @@ import locale
 import os
 import shutil
 import cyrtranslit
+import json
+from decimal import Decimal
+
 
 
 # Polje za unos i pregled naloga
@@ -1185,6 +1188,15 @@ class Nalozi:
 
         return broj_orisa_konacan
 
+    def folder_oris(self):
+        return os.getcwd() + "\\oris\\"
+
+    def napravi_json_fajl(self, podaci, broj_orisa):
+        putanja = os.path.join(self.folder_oris(), broj_orisa + ".json")
+
+        with open(putanja, 'w', encoding='utf-8') as fajl:
+            json.dump(podaci, fajl, default=str, ensure_ascii=False, indent=4)
+
     def kreiraj_oris(self):
         # PRVO PROVERITI DA LI POSTOJE PROKNJIZENI NALOZI U TEKUCOJ GODINI KOJI NEMAJU ORIS_ID (proknjizen = da AND oris_id is null)
         # ako nema takvih naloga - znaci da ne treba da se formira ORIS
@@ -1201,22 +1213,43 @@ class Nalozi:
                 oris_controller.unesi(broj_orisa)
                 poslednji_oris = oris_controller.pronadji_poslednji_oris()
                 id_poslednjeg_orisa = poslednji_oris[0][0]
+                # ucitavam podatke o siframa projekta, okruga ...
+                korisnik_controller = KorisnikController()
+                sifre = korisnik_controller.read()
+                xjbkjs = sifre[0][3]
+                xsifra_programa = sifre[0][4]
+                xsifra_projekta = sifre[0][5]
+                xsifra_funkcionalne = sifre[0][6]
+                xsifra_valute = int(sifre[0][7])
+                stavke_naloga_controller = StavkaNalogaController()
                 # PRONADJI SVE NALOGE IZ TEKUCE GODINE KOJI SU PROKNJIZENI I NEMAJU ORIS_ID
+                podaci_json = []
                 for nalog in nalozi_koji_nisu_u_orisu:
                     # azuriraj polje oris_id u svakom nalogu
                     nalozi_controller.update_nalog_oris(nalog[0], id_poslednjeg_orisa)
-
                     # Proci kroz svaki nalog, uzeti potrebne podatke (datum naloga) i iskoristiti ID naloga pa proci kroz svaku stavku naloga i uzeti podatke
-                    # na osnovu ovoga formirati CSV fajl
+                    stavke_naloga = stavke_naloga_controller.find_join(nalog[0])
+                    # TREBA FOR PETLJA
+                    for stavka in stavke_naloga:
+                        konto = stavka[1][:6]
+
+                        if stavka[5] == "d":
+                            iznos_duguje = Decimal(str(stavka[4]))
+                            iznos_potrazuje = ""
+                        else:
+                            iznos_duguje = ""
+                            iznos_potrazuje = Decimal((stavka[4]))
+                        podaci_stavke_naloga = {"IdentFajla": broj_orisa, "IdNalogaKorisika": nalog[3], "XSifraTrezora": "", "XJBKJS": xjbkjs, "XSifraPrograma": xsifra_programa, "XSifraProjekta": xsifra_projekta, "XSifraIzvoraFinansiranja": "01", "XSifraFunkcKlasifikacije": xsifra_funkcionalne, "XSifraEkonomskeKlasifikacije": konto, "XSifraPodekonomskeKlasifikacije": "", "XIznosDuguje": iznos_duguje, "XIznosPotrazuje": iznos_potrazuje, "XIznosDugujeStranaValuta": "", "XIznosPotrazujeStranaValuta": "", "XSifraValute": xsifra_valute, "XDatumKnjizenja": nalog[1].strftime('%Y-%m-%d'), "XDatumKreiranja": nalog[2].strftime('%Y-%m-%d')}
+                        podaci_json.append(podaci_stavke_naloga)
+
+                # na osnovu ovoga formirati JSON fajl
+                self.napravi_json_fajl(podaci_json, broj_orisa)
 
                 # ponovo ucitaj pocetnu tabelu sa nalozima
                 self.svi_nalozi(self.aktivna_godina)
+                messagebox.showinfo("Uspešno", "Uspešno ste formirali ORIS fajl!", parent=self.master)
             except Error as e:
                 messagebox.showwarning("Hmmmmm", "Nešto nije u redu sa formiranjem ORIS fajla!", parent=self.master)
-
-
-
-
 
         '''
         # Pronalazenje ID naloga na osnovu klika

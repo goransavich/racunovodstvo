@@ -1,0 +1,40 @@
+[
+    {
+        "IdentFajla": "2025-09-19-01",
+        "IdNalogaKorisika": "PROBA",
+        "XSifraTrezora": "",
+        "XJBKJS": "41107",
+        "XSifraPrograma": "0606",
+        "XSifraProjekta": "0016",
+        "XSifraIzvoraFinansiranja": "01",
+        "XSifraFunkcKlasifikacije": "130",
+        "XSifraEkonomskeKlasifikacije": "131211",
+        "XSifraPodekonomskeKlasifikacije": "",
+        "XIznosDuguje": "2000.00",
+        "XIznosPotrazuje": "",
+        "XIznosDugujeStranaValuta": "",
+        "XIznosPotrazujeStranaValuta": "",
+        "XSifraValute": 941,
+        "XDatumKnjizenja": "2025-09-10",
+        "XDatumKreiranja": "2025-09-18"
+    },
+    {
+        "IdentFajla": "2025-09-19-01",
+        "IdNalogaKorisika": "PROBA",
+        "XSifraTrezora": "",
+        "XJBKJS": "41107",
+        "XSifraPrograma": "0606",
+        "XSifraProjekta": "0016",
+        "XSifraIzvoraFinansiranja": "01",
+        "XSifraFunkcKlasifikacije": "130",
+        "XSifraEkonomskeKlasifikacije": "791111",
+        "XSifraPodekonomskeKlasifikacije": "",
+        "XIznosDuguje": "",
+        "XIznosPotrazuje": "2000.00",
+        "XIznosDugujeStranaValuta": "",
+        "XIznosPotrazujeStranaValuta": "",
+        "XSifraValute": 941,
+        "XDatumKnjizenja": "2025-09-10",
+        "XDatumKreiranja": "2025-09-18"
+    }
+]

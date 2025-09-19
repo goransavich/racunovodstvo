@@ -83,6 +83,7 @@ class StampaIzvestaja:
     def stampa_naloga(self, rezultat_stavke, datum_naloga, broj_naloga, datum_knjizenja):
         locale.setlocale(locale.LC_ALL, 'de_DE')
         pdf = PDF('portrait', 'cm', 'A4')
+        pdf.alias_nb_pages()
         # pdf.accept_page_break()
         pdf.add_page()
         duguje = 0
@@ -168,6 +169,7 @@ class StampaIzvestaja:
     def stampa_kartice_konta(self, rezultat_stavke, oznaka_konta_izvestaj):
         locale.setlocale(locale.LC_ALL, 'de_DE')
         pdf = PDF('portrait', 'cm', 'A4')
+        pdf.alias_nb_pages()
         # pdf.accept_page_break()
         pdf.add_page()
         duguje = 0
@@ -345,6 +347,7 @@ class StampaIzvestaja:
             locale.setlocale(locale.LC_ALL, 'de_DE')
 
             pdf = PDF('landscape', 'cm', 'A4')
+            pdf.alias_nb_pages()
             pdf.add_page()
 
             today = date.today()
@@ -512,7 +515,7 @@ class StampaIzvestaja:
         locale.setlocale(locale.LC_ALL, 'de_DE')
         pdf = PDF('portrait', 'cm', 'A4')
         pdf.add_page()
-
+        pdf.alias_nb_pages()
         today = date.today()
         danasnji_datum = today.strftime("%d.%m.%Y")
         pdf.set_font('Helvetica', '', 11)
@@ -712,6 +715,7 @@ class StampaIzvestaja:
             locale.setlocale(locale.LC_ALL, 'de_DE')
 
             pdf = PDF('landscape', 'cm', 'A4')
+            pdf.alias_nb_pages()
             pdf.add_page()
 
             today = date.today()
