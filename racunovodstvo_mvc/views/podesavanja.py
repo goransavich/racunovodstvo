@@ -5,18 +5,22 @@ from racunovodstvo_mvc.views.izvori_finansiranja import IzvoriFinansiranja
 from racunovodstvo_mvc.views.sistem import Sistem
 from racunovodstvo_mvc.views.dobavljaci import Dobavljaci
 
+
 # Polje sa dugmadima za podesavanja
 class Podesavanja:
-    def otvori_vrste_naloga(self):
+    @staticmethod
+    def otvori_vrste_naloga():
         VrsteNaloga()
 
     def unesi_konto(self):
         Konta(self.master)
 
-    def unesi_dobavljaca(self):
+    @staticmethod
+    def unesi_dobavljaca():
         Dobavljaci()
 
-    def izvor_finansiranja(self):
+    @staticmethod
+    def izvor_finansiranja():
         IzvoriFinansiranja()
 
     def sistem(self):
@@ -36,4 +40,3 @@ class Podesavanja:
         self.izvori.grid(row=0, column=3, padx=(1, 2), pady=10, sticky="w")
         self.sistem = Button(self.podesavanja_frame, text="Sistem", command=self.sistem, bg="#FFCF81")
         self.sistem.grid(row=0, column=4, pady=10, sticky="w")
-

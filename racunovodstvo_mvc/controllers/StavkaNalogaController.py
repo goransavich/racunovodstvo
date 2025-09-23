@@ -45,7 +45,8 @@ class StavkaNalogaController:
         except Error as e:
             Greske("Greška prilikom brisanja stavke naloga! - StavkaNalogaController", e)
 
-    def find_join(self, id_naloga):
+    @staticmethod
+    def find_join(id_naloga):
         try:
             select_columns = "stavke_naloga.stavkaID, konto.oznaka, konto.naziv, stavke_naloga.izvor, stavke_naloga.iznos, stavke_naloga.status_dp, stavke_naloga.komentar"
             order = 'stavke_naloga.stavkaID'

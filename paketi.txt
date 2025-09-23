@@ -34,3 +34,4 @@ VERZIJE:
 1.7  - 11.12.2024. Ispravljena je greska, kada se proknjizi nalog, da dugme za unos eFaktura postane neaktivno. Pomocu PyPDF2 se kreiraju eFakture u PDF iz xml fajla sa svim
                    prilozima. Izmenjen je bekap podataka, sada se kreira zip fajl sa podacima iz baze podataka i sadrzaj foldera eFakture.
 1.8  - 23.12.2024. Dodato je kada se uradi bekap podataka da se otvori prozor sa fajlovima gde se nalazi bekap.
+1.9  - 23.09.2025. Dodata je mogucnost kreiranja JSON fajla za ORIS.

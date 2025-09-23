@@ -32,7 +32,6 @@ import json
 from decimal import Decimal
 
 
-
 # Polje za unos i pregled naloga
 class Nalozi:
     def __init__(self, master):
@@ -113,6 +112,7 @@ class Nalozi:
         self.dugme_obrisi_efakturu = None
         self.ukupan_saldo_text = None
         self.ukupan_saldo = None
+        self.dugme_formiraj_oris = None
 
     def __proveri_jezik_broj_naloga(self, event):
         ucitaj_kontrolu = KeyboardController()
@@ -439,7 +439,8 @@ class Nalozi:
             messagebox.showinfo("Greška", "Morate izabrati konto iz liste!", parent=self.prozor_unos_naloga)
 
     # Prelazak fokusa na sledeci entry
-    def focus_next_window(self, event):
+    @staticmethod
+    def focus_next_window(event):
         event.widget.tk_focusNext().focus()
 
     def selektovanje_konta(self, e):
@@ -773,31 +774,36 @@ class Nalozi:
         except OSError:
             messagebox.showwarning("Greška", "Morate zatvoriti prethodni PDF izveštaj!", parent=self.prozor_unos_naloga)
 
-    def convert_u_latinicu(self, tekst):
+    @staticmethod
+    def convert_u_latinicu(tekst):
         return cyrtranslit.to_latin(tekst)
 
-    def pronadji_broj_ugovora(self, root,  namespace):
+    @staticmethod
+    def pronadji_broj_ugovora(root,  namespace):
         endpoint_id = root.find('.//cac:ContractDocumentReference/cbc:ID', namespace)
         if endpoint_id is not None:
             return endpoint_id.text
         else:
             return None
 
-    def pronadji_broj_fakture(self, root, namespace):
+    @staticmethod
+    def pronadji_broj_fakture(root, namespace):
         endpoint_id = root.find('.//cbc:ID', namespace)
         if endpoint_id is not None:
             return endpoint_id.text
         else:
             return None
 
-    def pronadji_datum_izdavanja_efakture(self, root, namespace):
+    @staticmethod
+    def pronadji_datum_izdavanja_efakture(root, namespace):
         endpoint_id = root.find('.//env:CreationDate', namespace)
         if endpoint_id is not None:
             return endpoint_id.text
         else:
             return None
 
-    def pronadji_pib_dobavljaca(self, root, namespace):
+    @staticmethod
+    def pronadji_pib_dobavljaca(root, namespace):
         endpoint_id = root.find('.//cac:AccountingSupplierParty/cac:Party/cbc:EndpointID', namespace)
         if endpoint_id is not None:
             return endpoint_id.text
@@ -811,22 +817,26 @@ class Nalozi:
         else:
             return None
 
-    def pronadji_iznos_fakture(self, root, namespace):
+    @staticmethod
+    def pronadji_iznos_fakture(root, namespace):
         endpoint_id = root.find('.//cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount', namespace)
         if endpoint_id is not None:
             return endpoint_id.text
         else:
             return None
 
-    def unesi_dobavljaca_u_bazu(self, pib, naziv, id_konta):
+    @staticmethod
+    def unesi_dobavljaca_u_bazu(pib, naziv, id_konta):
         conn = DobavljacController()
         conn.unos_dobavljaca_u_tabelu(pib, naziv, id_konta)
 
-    def pronadji_poslednji_slog_konto(self):
+    @staticmethod
+    def pronadji_poslednji_slog_konto():
         conn = KontoController()
         return conn.pronadji_poslednji_konto()[0][0]
 
-    def unesi_efakturu_u_bazu(self, naziv_fakture, id_naloga):
+    @staticmethod
+    def unesi_efakturu_u_bazu(naziv_fakture, id_naloga):
         conn_efakture = EfakturaController()
         conn_efakture.insert_efaktura(naziv_fakture, id_naloga)
 
@@ -860,7 +870,7 @@ class Nalozi:
             base = os.path.basename(faktura)
             # dodavanje random broja nazivu fakture, da se ne bi slucajno pojavile dve razlicite fakture sa istim brojem
             random_broj = str(random.randint(1, 1000000))
-            #destinacija = os.getcwd() + "\\racunovodstvo_mvc\\efakture\\" + random_broj + "_" + base
+            # destinacija = os.getcwd() + "\\racunovodstvo_mvc\\efakture\\" + random_broj + "_" + base
             destinacija = os.getcwd() + "\\efakture\\" + random_broj + "_" + base
             naziv_efakture = random_broj + "_" + base
             # kopiranje fakture u folder efakture
@@ -878,7 +888,7 @@ class Nalozi:
                 id_konta_131211 = pronadji_id_konta[0][0]
                 # pronaci naziv dobavljaca
                 naziv_dobavljaca = self.pronadji_naziv_dobavljaca(root, namespaces)[:40]
-                #naziv_dobavljaca_latin = self.convert_u_latinicu(naziv_dobavljaca)
+                # naziv_dobavljaca_latin = self.convert_u_latinicu(naziv_dobavljaca)
                 # pronaci iznos fakture
                 iznos_fakture = self.pronadji_iznos_fakture(root, namespaces)
                 # proveriti u tabeli dobavljaca da li postoji
@@ -933,16 +943,11 @@ class Nalozi:
     def prikaz_efaktura_u_tabeli(self, rezultat):
         # global count_konto
         count_fakture = 0
-
         for record in rezultat:
             if count_fakture % 2 == 0:
-                self.my_tree_efakture.insert(parent='', index='end', iid=record[0], text='',
-                                               values=(record[1], locale.format_string('%10.2f', float(record[2]), grouping=True)),
-                                               tags=('evenrow',))
+                self.my_tree_efakture.insert(parent='', index='end', iid=record[0], text='', values=(record[1], locale.format_string('%10.2f', float(record[2]), grouping=True)), tags=('evenrow',))
             else:
-                self.my_tree_efakture.insert(parent='', index='end', iid=record[0], text='',
-                                               values=(record[1], locale.format_string('%10.2f', float(record[2]), grouping=True)),
-                                               tags=('oddrow',))
+                self.my_tree_efakture.insert(parent='', index='end', iid=record[0], text='', values=(record[1], locale.format_string('%10.2f', float(record[2]), grouping=True)), tags=('oddrow',))
             count_fakture += 1
 
     def prikaz_svih_efaktura(self):
@@ -974,10 +979,12 @@ class Nalozi:
             # uneti u tabelu
             self.prikaz_efaktura_u_tabeli(lista_efaktura)
 
-    def folder_efaktura(self):
+    @staticmethod
+    def folder_efaktura():
         return os.getcwd() + "\\efakture\\"
 
-    def nadji_naziv_efakture(self, id_efakture):
+    @staticmethod
+    def nadji_naziv_efakture(id_efakture):
         conn_efakture = EfakturaController()
         pronadjena_efaktura = conn_efakture.find_efakture_by_id(id_efakture)
         return pronadjena_efaktura[0][1]
@@ -1010,14 +1017,16 @@ class Nalozi:
             messagebox.showwarning("Greška", "Hmmmm niste odabrali ni jednu eFakturu za brisanje!",
                                    parent=self.prozor_ucitane_efakture)
 
-    def pronadji_mime_pdf(self, root, namespace):
+    @staticmethod
+    def pronadji_mime_pdf(root, namespace):
         endpoint_id = root.find('.//env:DocumentPdf', namespace)
         if endpoint_id is not None:
             return endpoint_id.text
         else:
             return None
 
-    def pronadji_priloge_efakture(self, root, namespace):
+    @staticmethod
+    def pronadji_priloge_efakture(root, namespace):
         embedded_objects = root.findall('.//cbc:EmbeddedDocumentBinaryObject', namespace)
         if embedded_objects is not None:
             lista_priloga = []
@@ -1188,7 +1197,8 @@ class Nalozi:
 
         return broj_orisa_konacan
 
-    def folder_oris(self):
+    @staticmethod
+    def folder_oris():
         return os.getcwd() + "\\oris\\"
 
     def napravi_json_fajl(self, podaci, broj_orisa):
@@ -1326,17 +1336,14 @@ class Nalozi:
                         messagebox.showwarning("Greška", "Hmmmmm, nešto nije u redu sa formiranjem ORIS fajla!", parent=self.master)
         else:
             messagebox.showwarning("Greška", "Hmmmmm, niste izabrali ni jedan nalog!", parent=self.master)
-
         '''
-
-
     def ucitane_efakture(self):
         self.prozor_ucitane_efakture = Toplevel()
         # self.prozor_ucitane_efakture.attributes('-topmost', 'true')
         self.prozor_ucitane_efakture.grab_set()
         self.prozor_ucitane_efakture.title("Pregled učitanih eFaktura za nalog: " + self.broj_kreiranog_naloga)
         self.prozor_ucitane_efakture.geometry("800x600")
-        self.prozor_ucitane_efakture.resizable(0, 0)
+        self.prozor_ucitane_efakture.resizable(False, False)
         self.prozor_ucitane_efakture.columnconfigure(0, weight=1)
         self.prozor_ucitane_efakture.rowconfigure(0, weight=2)
         self.prozor_ucitane_efakture.rowconfigure(1, weight=1)
@@ -1355,8 +1362,7 @@ class Nalozi:
         # Definisanje tabele sa proknjizenim nalozima
         self.style_efakture = ttk.Style()
         self.style_efakture.theme_use('default')
-        self.style_efakture.configure("Treeview", background="#d3d3d3", foreground="black", rowheight=25,
-                                        fieldbackground="d3d3d3")
+        self.style_efakture.configure("Treeview", background="#d3d3d3", foreground="black", rowheight=25, fieldbackground="d3d3d3")
         # Boja selektrovanog reda
         self.style_efakture.map('Treeview', background=[('selected', '#347083')])
 
@@ -1499,7 +1505,7 @@ class Nalozi:
         # Uzimanje iz baze spisak izvora finansiranja
 
         svi_izvori = self.lista_izvora_finansiranja()
-        self.izvor_combo = ttk.Combobox(self.drugi_frame_unos, justify='center', font="7", width="8")
+        self.izvor_combo = ttk.Combobox(self.drugi_frame_unos, justify='center', font="7", width=8)
         self.izvor_combo.grid(row=1, column=2, padx=10, pady=10, sticky="ew")
         self.izvor_combo['values'] = svi_izvori
         self.izvor_combo.current(0)
@@ -1638,8 +1644,7 @@ class Nalozi:
         self.saldo_unos_potrazuje.grid(row=0, column=3, padx=10, pady=10, ipadx=5, ipady=5, sticky='w')
         self.ukupan_saldo_text = Label(self.cetvrti_frame_unos, text="Saldo:")
         self.ukupan_saldo_text.grid(row=0, column=4, padx=10, pady=10, sticky='e')
-        self.ukupan_saldo = Label(self.cetvrti_frame_unos, bg="white", font="12", justify="right", text='',
-                                          borderwidth=2, relief="groove", width=40)
+        self.ukupan_saldo = Label(self.cetvrti_frame_unos, bg="white", font="12", justify="right", text='', borderwidth=2, relief="groove", width=40)
         self.ukupan_saldo.grid(row=0, column=5, padx=10, pady=10, ipadx=5, ipady=5, sticky='w')
 
         ######################################################################################################

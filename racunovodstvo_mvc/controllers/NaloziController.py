@@ -71,9 +71,8 @@ class NaloziController:
             Greske(
                 "Pronalazenje u bazi spiska naloga sa podacima BEZ duguje potrazuje, i da li je proknjizen - ovo ide u tabelu na naslovnu stranu za trenutnu radnu godinu- NaloziController ",
                 e)
-
-
     '''
+    
     def read_nalozi_oris(self, godina):
         try:
             select_columns = "nalog.nalogID, nalog.broj, nalog.datum, nalog.vrsta, nalog.proknjizen, "
@@ -142,7 +141,8 @@ class NaloziController:
             Greske(
                 "Hmmmm, neka greška prilikom povezivanja na bazu podataka! provera da li postoji nalog - NaloziController", e)
 
-    def read_dnevnik_knjizenja(self, pocetna, krajnja):
+    @staticmethod
+    def read_dnevnik_knjizenja(pocetna, krajnja):
         try:
             select_columns = "nalog.broj, nalog.datum, nalog.vrsta, konto.oznaka, konto.naziv, stavke_naloga.iznos, stavke_naloga.status_dp"
             condition = "nalog.proknjizen='da' and nalog.datum between '{}'".format(pocetna)+" and '{}'".format(krajnja)

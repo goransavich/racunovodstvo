@@ -4,11 +4,10 @@ from racunovodstvo_mvc.views.podesavanja import Podesavanja
 from racunovodstvo_mvc.views.izvestaji import Izvestaji
 from racunovodstvo_mvc.views.nalozi import Nalozi
 from racunovodstvo_mvc.views.godinaframe import GodinaFrame
-#import faulthandler
+# import faulthandler
 
-#import wmi
-import os
-from tkinter import messagebox
+# import wmi
+
 from tkinter import *
 # faulthandler.enable() - OVO MOZE DA SE KORISTI DA SE VIDI GDE JE GRESKA *** ODLICNA STVAR ***
 

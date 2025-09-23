@@ -3,7 +3,8 @@ from racunovodstvo_mvc.controllers.connections import Database
 from racunovodstvo_mvc.views.greske import Greske
 # Connect to database
 
-class VrstenalogaController():
+
+class VrstenalogaController:
 
     tablename = "vrste_naloga"
 
@@ -14,19 +15,17 @@ class VrstenalogaController():
             svi_nalozi = connection.select(self.tablename, select_columns)
             return svi_nalozi
         except Error as e:
-            Greske("Greska citanje svih vrsta naloga - VrstenalogaController",e)
+            Greske("Greska citanje svih vrsta naloga - VrstenalogaController", e)
 
-
-    def update_nalog(self, naziv, id):
+    def update_nalog(self, naziv, id_vrste_naloga):
         # Ažuriranje baze podataka
         try:
             set_condition = 'vrste_naloga="{}"'.format(naziv)
-            filter_condition = ' idvrste_naloga='+id
+            filter_condition = ' idvrste_naloga='+id_vrste_naloga
             connection = Database()
             connection.update(self.tablename, set_condition, filter_condition)
         except Error as e:
             Greske("Problem prilikom izmena vrste naloga - VrstenalogaController", e)
-
 
     def insert_nalog(self, naziv):
         try:
@@ -37,12 +36,11 @@ class VrstenalogaController():
         except Error as e:
             Greske("Problem unosa vrste naloga - VrstenalogaController", e)
 
-    def delete_nalog(self, id):
+    def delete_nalog(self, id_vrste_naloga):
         # Brisanje iz baze podataka
         try:
-            delete_condition = "idvrste_naloga="+id
+            delete_condition = "idvrste_naloga="+id_vrste_naloga
             connection = Database()
             connection.delete(self.tablename, delete_condition)
         except Error as e:
             Greske("Hmmmm, neka greška prilikom brisanja podataka vrste naloga - VrstenalogaController!", e)
-
