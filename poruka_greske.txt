@@ -1,1 +1,3 @@
 
+Dobijanje stanje konta po kategorijama - KontoController, 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ', c, a, s, e,  , w, h, e, n,  , s, t, a, v, k, e, _, n, a, l, o, g, a, ., s, t, ' at line 1 ,23.10.2025.
+Dobijanje stanje konta po kategorijama - KontoController, 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ', c, a, s, e,  , w, h, e, n,  , s, t, a, v, k, e, _, n, a, l, o, g, a, ., s, t, ' at line 1 ,23.10.2025.

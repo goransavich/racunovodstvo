@@ -247,6 +247,44 @@ class KontoController:
         except Error as e:
             Greske("Dobijanje stanje konta po kategorijama - KontoController", e)
 
+    # Dobijanje rezultata rashoda za elektronski izvestaj o izvršenju budžeta
+    def izvrsenje_budzeta_elektronski_rashodi(self, datum_pocetni, datum_krajnji):
+        try:
+            select_columns = "sum(case when stavke_naloga.status_dp='d' then stavke_naloga.iznos end)"
+            #select_izjava = ", ".join(select_columns)
+            iz_tabele = "stavke_naloga"
+            join1 = "nalog on stavke_naloga.nalogID=nalog.nalogID"
+            join2 = "konto on stavke_naloga.kontoID=konto.idkonto"
+            where_condition = "stavke_naloga.kontoID=konto.idkonto and konto.oznaka between '400000' and '699999' and nalog.proknjizen='da' and nalog.datum between '{}'".format(
+                datum_pocetni) + " and '{}'".format(datum_krajnji)
+            nivo = 4
+            order_by = "konto.oznaka"
+            connection = Database()
+            sve_konto = connection.select_distinct_izvrsenje(select_columns, iz_tabele, join1, join2, where_condition, order_by, nivo)
+            return sve_konto
+        except Error as e:
+            Greske("Dobijanje rashoda konta - KontoController.izvrsenje_budzeta_elektronski_rashodi", e)
+
+    # Dobijanje rezultata prihoda za elektronski izvestaj o izvršenju budžeta
+
+    def izvrsenje_budzeta_elektronski_prihodi(self, datum_pocetni, datum_krajnji):
+        try:
+            select_columns = "sum(case when stavke_naloga.status_dp='p' then stavke_naloga.iznos end)"
+            # select_izjava = ", ".join(select_columns)
+            iz_tabele = "stavke_naloga"
+            join1 = "nalog on stavke_naloga.nalogID=nalog.nalogID"
+            join2 = "konto on stavke_naloga.kontoID=konto.idkonto"
+            where_condition = "stavke_naloga.kontoID=konto.idkonto and konto.oznaka between '700000' and '999999' and nalog.proknjizen='da' and nalog.datum between '{}'".format(
+                datum_pocetni) + " and '{}'".format(datum_krajnji)
+            nivo = 4
+            order_by = "konto.oznaka"
+            connection = Database()
+            sve_konto = connection.select_distinct_izvrsenje(select_columns, iz_tabele, join1, join2, where_condition,
+                                                             order_by, nivo)
+            return sve_konto
+        except Error as e:
+            Greske("Dobijanje prihoda konta - KontoController.izvrsenje_budzeta_elektronski_prihodi", e)
+
     # Zakljucni list
     def zakljucni_list(self, kategorija_num, datum_pocetni, datum_krajnji, godina):
         try:

@@ -7,6 +7,8 @@ from racunovodstvo_mvc.views.dnevnik_knjizenja import DnevnikKnjizenja
 from racunovodstvo_mvc.views.glavna_knjiga import GlavnaKnjiga
 from racunovodstvo_mvc.views.knjiga_dobavljaca import KnjigaDobavljaca
 from racunovodstvo_mvc.views.placeni_avansi import PlaceniAvansi
+from racunovodstvo_mvc.views.izvrsenje_budzeta_elektronski import IzvrsenjeBudzetaElektronski
+from racunovodstvo_mvc.views.zavrsni_racun_elektronski import ZavrsniRacunElektronski
 
 
 # Polje sa dugmadima za izvestaje
@@ -36,6 +38,12 @@ class Izvestaji:
     def __otvori_placene_avanse(self):
         PlaceniAvansi(self.master)
 
+    def __otvori_izvrsenje_budzeta_elektronski(self):
+        IzvrsenjeBudzetaElektronski(self.master)
+
+    def __otvori_zavrsni_racun_elektronski(self):
+        ZavrsniRacunElektronski(self.master)
+
     def __init__(self, master):
         self.master = master
         self.izvestaji_frame = LabelFrame(text="Izveštaji", bg="lightblue")
@@ -56,3 +64,7 @@ class Izvestaji:
         self.knjiga_dobavljaca.grid(row=0, column=6, pady=10, sticky="w")
         self.placeni_avansi = Button(self.izvestaji_frame, text="Plaćeni avansi", command=self.__otvori_placene_avanse, bg="#265073", fg="white")
         self.placeni_avansi.grid(row=0, column=7, padx=1, pady=10, sticky="w")
+        self.izvrsenje_budzeta_elektronski = Button(self.izvestaji_frame, text="Izvršenje budžeta - elektronski", command=self.__otvori_izvrsenje_budzeta_elektronski, bg="#265073", fg="white")
+        self.izvrsenje_budzeta_elektronski.grid(row=0, column=8, pady=10, sticky="w")
+        self.zavrsni_racun_elektronski = Button(self.izvestaji_frame, text="Završni račun - elektronski", command=self.__otvori_zavrsni_racun_elektronski, bg="#265073", fg="white")
+        self.zavrsni_racun_elektronski.grid(row=0, column=9, padx=1, pady=10, sticky="w")
