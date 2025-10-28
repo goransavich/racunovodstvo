@@ -2,13 +2,17 @@ from racunovodstvo_mvc.controllers.DimenzijeProzora import DimenzijeProzora
 from tkinter import Toplevel, Frame, Label, Button, messagebox, Entry
 from tkcalendar import DateEntry
 from racunovodstvo_mvc.controllers.StavkaNalogaController import StavkaNalogaController
-from racunovodstvo_mvc.views.stampa_izvestaja import StampaIzvestaja
 from racunovodstvo_mvc.controllers.KontoController import KontoController
+from racunovodstvo_mvc.controllers.KorisnikController import KorisnikController
+from racunovodstvo_mvc.views.aop import Aop
+import os
+import json
 
 
 class IzvrsenjeBudzetaElektronski:
 
-    def pronadji_ukupan_broj_izvora(self):
+    @staticmethod
+    def pronadji_ukupan_broj_izvora():
         stavke_conn = StavkaNalogaController()
         pronadjeni_izvori = stavke_conn.pronadji_izvore()
         lista_izvora = []
@@ -17,7 +21,9 @@ class IzvrsenjeBudzetaElektronski:
                 lista_izvora.append(item[0])
 
         return lista_izvora
-    def rezultat_upita(self, pocetni, krajnji):
+
+    @staticmethod
+    def rezultat_upita(pocetni, krajnji):
         connect = StavkaNalogaController()
         rezultat = connect.prikazi_podatke_glavna_knjiga(pocetni, krajnji)
         return rezultat
@@ -31,12 +37,70 @@ class IzvrsenjeBudzetaElektronski:
         else:
             return 0
 
+    def kreiranje_json_strukture(self, naziv_izvestaja):
+        id_izvestaja = int(self.id_dokumenta_entry.get())
+        json_data = {
+            "Header": {
+                "Name": naziv_izvestaja,
+                "OrganizationStatus": "None",
+                "OrganizationStatusChangedDate": None,
+                "ReportTypePeriodId": id_izvestaja,
+                "Description": ""
+            },
+            "Forms": [
+                {
+                    "Header": {
+                        "Type": 5,
+                        "Kind": 1
+                    }
+                }
+            ]
+        }
+        return json_data
+
+    @staticmethod
+    def folder_izvestaj_izvrsenje():
+        return os.getcwd() + "\\izvrsenje_budzeta\\"
+
+    def napravi_json_fajl(self, podaci, naziv_fajla):
+        putanja = os.path.join(self.folder_izvestaj_izvrsenje(), naziv_fajla + ".json")
+
+        with open(putanja, 'w', encoding='utf-8') as fajl:
+            json.dump(podaci, fajl, default=str, ensure_ascii=False, indent=4)
+
+    @staticmethod
+    def pronadji_jbkjs():
+        korisnik = KorisnikController()
+        izabrani_korisnik = korisnik.read()
+        jbkjs = izabrani_korisnik[0][3]
+        return jbkjs
+
+    @staticmethod
+    def odredi_oznaku_izvestaja(pocetni, krajnji):
+        if pocetni == 1 and krajnji == 3:
+            oznaka_izvestaja = "PFI1"
+        elif pocetni == 1 and krajnji == 6:
+            oznaka_izvestaja = "PFI2"
+        elif pocetni == 1 and krajnji == 9:
+            oznaka_izvestaja = "PFI3"
+        elif pocetni == 1 and krajnji == 12:
+            oznaka_izvestaja = "PFI4"
+        else:
+            oznaka_izvestaja = "neispravan period"
+        return oznaka_izvestaja
+
+    @staticmethod
+    def napravi_naziv_izvestaja(oznaka, godina, jbkjs):
+        return oznaka + "-" + godina + "-" + jbkjs + "-1"
+
     def kreiraj_izvrsenje_budzeta_elektronski(self):
         pocetni = self.datum_od.get_date()
         krajnji = self.datum_do.get_date()
         pocetna_godina = pocetni.year
         krajnja_godina = krajnji.year
         id_izvestaja = self.id_dokumenta_entry.get()
+        pocetni_mesec = pocetni.month
+        krajnji_mesec = krajnji.month
 
         if pocetni > krajnji:
             messagebox.showwarning("Greška", "Početni datum je veći od završnog datuma!", parent=self.prozor_izvrsenje_budzeta_elektronski)
@@ -56,29 +120,30 @@ class IzvrsenjeBudzetaElektronski:
                 # nizu rezultata rashoda dodajem elemente iz niza prihodi i pravim jednu listu
                 for element in rezultat_prihodi:
                     rezultat_rashodi.append(element)
-                print(rezultat_rashodi)
+
                 # pretvoriti brojeve u hiljade
                 zaokruzeni = [(konto, self.svedi_na_hiljade(b)) for konto, b in rezultat_rashodi]
-                print(zaokruzeni)
 
+                ucitaj_aop = Aop()
                 # TREBA UNETI VREDNOSTI ZA KONTA U POSEBNU KLASU primer kao u mapi ispod
-                '''
-                mapa = {'0111': '1004', '0112': '1005'}
-                lista = [('0111', 18612), ('4121', 1861), ('4122', 959), ('4131', 54), ('1005', 266), ('4144', 141)]
-                
+                mapirani_aop = ucitaj_aop.mapa
                 # Kreiraj novu listu sa zamenjenim vrednostima
-                nova_lista = [(mapa.get(tekst, tekst), broj) for tekst, broj in lista]
-                
-                print(nova_lista)
-                '''
-
-
-                # Dobijene podatke poslati na stampu
-                #stampa = StampaIzvestaja()
-                #stampa.stampa_glavne_knjige(rezultat, pocetni, krajnji)
-                # self.rezultat_kartice_konta = self.__pronadji_karticu(konto, pocetni, krajnji)
+                nova_lista = [(mapirani_aop.get(tekst, tekst), broj) for tekst, broj in zaokruzeni]
+                # KREIRANJE JSON FAJLA
+                # odredjivanje naziva fajla - za koji period se pravi
+                naziv_izvestaja_za_snimanje = self.napravi_naziv_izvestaja(self.odredi_oznaku_izvestaja(pocetni_mesec, krajnji_mesec), str(krajnja_godina), self.pronadji_jbkjs())
+                json_data = self.kreiranje_json_strukture(naziv_izvestaja_za_snimanje)
+                # Dodavanje podataka u prvi element Forms liste
+                form_entry = json_data["Forms"][0]
+                for key, value in nova_lista:
+                    form_entry[key] = [0, value]
+                # Snimanje u fajl
+                # pravljenje JSON fajla
+                self.napravi_json_fajl(json_data, naziv_izvestaja_za_snimanje)
+                messagebox.showinfo("Uspešno", "Uspešno je formiran JSON izveštaj " + naziv_izvestaja_za_snimanje + ". Možete ga pronaći u folderu racunovodstvo/izvrsenje_budzeta.",
+                                       parent=self.prozor_izvrsenje_budzeta_elektronski)
             except OSError:
-                messagebox.showwarning("Greška", "Morate zatvoriti prethodno kreiran JSON fajl!", parent=self.prozor_izvrsenje_budzeta_elektronski)
+                messagebox.showwarning("Greška", "Nije formiran JSON, neka greška je u pitanju!", parent=self.prozor_izvrsenje_budzeta_elektronski)
 
     def __init__(self, master):
         self.master = master
