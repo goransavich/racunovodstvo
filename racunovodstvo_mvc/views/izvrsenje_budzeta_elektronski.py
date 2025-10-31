@@ -11,6 +11,7 @@ import json
 
 class IzvrsenjeBudzetaElektronski:
 
+    '''
     @staticmethod
     def pronadji_ukupan_broj_izvora():
         stavke_conn = StavkaNalogaController()
@@ -27,6 +28,7 @@ class IzvrsenjeBudzetaElektronski:
         connect = StavkaNalogaController()
         rezultat = connect.prikazi_podatke_glavna_knjiga(pocetni, krajnji)
         return rezultat
+    '''
 
     @staticmethod
     def svedi_na_hiljade(broj):
@@ -108,6 +110,8 @@ class IzvrsenjeBudzetaElektronski:
             messagebox.showwarning("Greška", "Izveštaj možete da dobijete u okviru jedne kalendarske godine!", parent=self.prozor_izvrsenje_budzeta_elektronski)
         elif id_izvestaja == "":
             messagebox.showwarning("Greška", "Morate uneti ID izveštaja sa sajta Uprave za trezor!", parent=self.prozor_izvrsenje_budzeta_elektronski)
+        elif self.odredi_oznaku_izvestaja(pocetni_mesec, krajnji_mesec) == "neispravan period":
+            messagebox.showwarning("Greška", "Niste izabrali ispravan period za izveštaj!", parent=self.prozor_izvrsenje_budzeta_elektronski)
         else:
             try:
                 # Treba da pronadjem podatke

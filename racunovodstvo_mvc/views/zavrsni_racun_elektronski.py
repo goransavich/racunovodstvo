@@ -1,11 +1,26 @@
 from racunovodstvo_mvc.controllers.DimenzijeProzora import DimenzijeProzora
-from tkinter import Toplevel, Frame, Label, Button, messagebox, Entry
+from tkinter import Toplevel, Frame, Label, Button, messagebox, Entry, ttk
 from tkcalendar import DateEntry
 from racunovodstvo_mvc.controllers.StavkaNalogaController import StavkaNalogaController
-from racunovodstvo_mvc.views.stampa_izvestaja import StampaIzvestaja
+from racunovodstvo_mvc.controllers.GodinaController import GodinaConnection
+from racunovodstvo_mvc.controllers.KontoController import KontoController
+from datetime import datetime
+
 
 
 class ZavrsniRacunElektronski:
+
+    def prikaz_godina(self):
+        # povezivanje na bazu i preuzimanje godina iz tabele
+        konekcija = GodinaConnection()
+        rezultat = konekcija.read()
+        sve_godine = []
+        for i in rezultat:
+            sve_godine.append(i[1])
+        self.godina_combo['values'] = sve_godine
+        # self.godina_combo['state'] = 'readonly'
+        self.godina_combo.current(0)
+        #self.godina_combo.bind('<<ComboboxSelected>>', self.promena_godine)
 
     def rezultat_upita(self, pocetni, krajnji):
         connect = StavkaNalogaController()
@@ -13,25 +28,37 @@ class ZavrsniRacunElektronski:
         return rezultat
 
     def kreiraj_zavrsni_racun_elektronski(self):
-        pocetni = self.datum_od.get_date()
-        krajnji = self.datum_do.get_date()
-        pocetna_godina = pocetni.year
-        krajnja_godina = krajnji.year
-
-        if pocetni > krajnji:
-            messagebox.showwarning("Greška", "Početni datum je veći od završnog datuma!", parent=self.prozor_zavrsni_racun_elektronski)
-        elif pocetna_godina != krajnja_godina:
-            messagebox.showwarning("Greška", "Izveštaj možete da dobijete u okviru jedne kalendarske godine!", parent=self.prozor_zavrsni_racun_elektronski)
+        # postaviti pocetni i krajnji datum zavrsnog racuna na osnovu izabrane godine
+        izabrana_godina = self.godina_combo.get()
+        pocetni_datum = "01-01-" + izabrana_godina
+        zavrsni_datum = "31-12-" + izabrana_godina
+        pocetni_datum_objekat = datetime.strptime(pocetni_datum, "%d-%m-%Y")
+        zavrsni_datum_objekat = datetime.strptime(zavrsni_datum, "%d-%m-%Y")
+        pocetni_datum_date = pocetni_datum_objekat.date()
+        zavrsni_datum_date = zavrsni_datum_objekat.date()
+        id_izvestaja = self.id_dokumenta_entry.get()
+        konto_conn = KontoController()
+        if id_izvestaja == "":
+            messagebox.showwarning("Greška", "Morate uneti ID izveštaja sa sajta Uprave za trezor!", parent=self.prozor_zavrsni_racun_elektronski)
         else:
-            try:
-                # Treba da pronadjem podatke
-                rezultat = self.rezultat_upita(pocetni, krajnji)
-                # Dobijene podatke poslati na stampu
-                stampa = StampaIzvestaja()
-                stampa.stampa_glavne_knjige(rezultat, pocetni, krajnji)
-                # self.rezultat_kartice_konta = self.__pronadji_karticu(konto, pocetni, krajnji)
-            except OSError:
-                messagebox.showwarning("Greška", "Morate zatvoriti prethodno kreiran JSON fajl!", parent=self.prozor_zavrsni_racun_elektronski)
+            # podaci za obrazac 1 - Aktiva
+            # Pocetno stanje aktive - preneto iz prethodne godine
+            aktiva = konto_conn.zavrsni_racun_aktiva(pocetni_datum_date, zavrsni_datum_date, izabrana_godina)
+            vanbilansna_aktiva = konto_conn.zavrsni_racun_vanbilansna_aktiva(pocetni_datum_date, zavrsni_datum_date,izabrana_godina)
+            # nizu rezultata aktiva dodajem elemente iz niza vanbilansna aktiva i pravim jednu listu
+            for element in vanbilansna_aktiva:
+                aktiva.append(element)
+            print(aktiva)
+            # Zavrsno stanje aktive
+
+            # podaci za obrazac 1 - Pasiva
+
+            # podaci za obrazac 5 - Izvestaj o izvrsenju budzeta
+
+            # Objediniti sve podatke u jedan niz
+
+
+
 
     def __init__(self, master):
         self.master = master
@@ -78,30 +105,34 @@ class ZavrsniRacunElektronski:
         self.frame_datumi.rowconfigure(1, weight=1)
         self.frame_datumi.columnconfigure(0, weight=1)
         self.frame_datumi.columnconfigure(1, weight=1)
-        self.label_datum_od = Label(self.frame_datumi, text="Datum od:")
-        self.label_datum_od.grid(row=0, column=0, padx=10, pady=10, sticky='ew')
 
+        self.label_datum_od = Label(self.frame_datumi, text="Završni račun za:")
+        self.label_datum_od.grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        '''
         self.label_datum_do = Label(self.frame_datumi, text="Datum do:")
         self.label_datum_do.grid(row=0, column=1, padx=10, pady=10, sticky='ew')
-
+        
         # Input polje za unos datuma od
         self.datum_od = DateEntry(self.frame_datumi, selectmode='day', locale='sr_RS',
                                   date_pattern='dd.MM.yyyy', font="8")
         self.datum_od.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+        
+
         # Input polje za unos datuma do
         self.datum_do = DateEntry(self.frame_datumi, selectmode='day', locale='sr_RS',
                                   date_pattern='dd.MM.yyyy', font="8")
-        self.datum_do.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
+        self.datum_do.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        '''
 
-        self.frame_id = Frame(self.drugi_frame)
-        self.frame_id.grid(row=1, column=0, sticky="nsew")
-        self.frame_id.rowconfigure(0, weight=1)
-        self.frame_id.columnconfigure(0, weight=1)
-        self.frame_id.columnconfigure(1, weight=1)
-        self.id_dokumenta_label = Label(self.frame_id, text="Unesi ID dokumenta:")
-        self.id_dokumenta_label.grid(row=0, column=0, padx=10, pady=10, sticky='ew')
-        self.id_dokumenta_entry = Entry(self.frame_id, font="8")
-        self.id_dokumenta_entry.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        # Definisanje promenjive koja će predstavljati godinu na vrhu glavnog ekrana
+        self.godina_combo = ttk.Combobox(self.frame_datumi)
+        self.godina_combo.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        self.prikaz_godina()
+
+        self.id_dokumenta_label = Label(self.frame_datumi, text="Unesi ID dokumenta:")
+        self.id_dokumenta_label.grid(row=1, column=0, padx=10, pady=10, sticky='ew')
+        self.id_dokumenta_entry = Entry(self.frame_datumi, font="8")
+        self.id_dokumenta_entry.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
 
         self.frame_dugme = Frame(self.drugi_frame)
         self.frame_dugme.grid(row=2, column=0, sticky="nsew")
