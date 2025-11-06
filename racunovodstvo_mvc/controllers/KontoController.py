@@ -305,7 +305,7 @@ class KontoController:
             Greske("Dobijanje zakljucnog lista - KontoController.zakljucni_list", e)
 
     # Zavrsni racun elektronski
-    def zavrsni_racun_aktiva(self, datum_pocetni, datum_krajnji, godina):
+    def zavrsni_racun_aktiva_pocetno(self, datum_pocetni, datum_krajnji, godina):
         try:
             pocetno = "PS-{}".format(godina)
             select_columns = "sum(case when stavke_naloga.status_dp='d' and nalog.broj='{}'".format(
@@ -323,9 +323,9 @@ class KontoController:
                                                    order_by, nivo)
             return sve_konto
         except Error as e:
-            Greske("Dobijanje zavrsnog racuna aktiva - KontoController.zavrsni_racun_aktiva", e)
+            Greske("Dobijanje zavrsnog racuna aktiva pocetno - KontoController.zavrsni_racun_aktiva_pocetno", e)
 
-    def zavrsni_racun_vanbilansna_aktiva(self, datum_pocetni, datum_krajnji, godina):
+    def zavrsni_racun_vanbilansna_aktiva_pocetno(self, datum_pocetni, datum_krajnji, godina):
         try:
             pocetno = "PS-{}".format(godina)
             select_columns = "sum(case when stavke_naloga.status_dp='d' and nalog.broj='{}'".format(
@@ -343,4 +343,126 @@ class KontoController:
                                                    order_by, nivo)
             return sve_konto
         except Error as e:
-            Greske("Dobijanje zavrsnog racuna elektronskog vanbilansna aktiva - KontoController.zavrsni_racun_vanbilansna aktiva", e)
+            Greske("Dobijanje zavrsnog racuna elektronskog vanbilansna aktiva pocetno - KontoController.zavrsni_racun_vanbilansna aktiva_pocetno", e)
+
+    def zavrsni_racun_aktiva_tekuce_bruto(self, datum_pocetni, datum_krajnji):
+        try:
+            #pocetno = "PS-{}".format(godina)
+            select_columns = "sum(case when stavke_naloga.status_dp='d' and konto.naziv NOT LIKE '%ispravka%' then stavke_naloga.iznos else 0 end) - sum(case when stavke_naloga.status_dp='p' and konto.naziv NOT LIKE '%ispravka%' then stavke_naloga.iznos else 0 end) as aktiva_trenutno"
+            iz_tabele = "stavke_naloga"
+            join1 = "nalog on stavke_naloga.nalogID=nalog.nalogID"
+            join2 = "konto on stavke_naloga.kontoID=konto.idkonto"
+            where_condition = "stavke_naloga.kontoID=konto.idkonto and konto.oznaka between '000000' and '139999' and nalog.proknjizen='da' and nalog.datum between '{}'".format(
+                datum_pocetni) + " and '{}'".format(datum_krajnji)
+            nivo = 4
+            order_by = "konto.oznaka"
+            connection = Database()
+            sve_konto = connection.select_distinct(select_columns, iz_tabele, join1, join2, where_condition, order_by, nivo)
+            return sve_konto
+        except Error as e:
+            Greske("Dobijanje zavrsnog racuna aktiva tekuce - KontoController.zavrsni_racun_aktiva_tekuce", e)
+
+    def zavrsni_racun_aktiva_tekuce_ispravka_vrednosti(self, datum_pocetni, datum_krajnji):
+        try:
+            #pocetno = "PS-{}".format(godina)
+            select_columns = "sum(case when stavke_naloga.status_dp='d' and konto.naziv LIKE '%ispravka%' then stavke_naloga.iznos else 0 end) - sum(case when stavke_naloga.status_dp='p' and konto.naziv LIKE '%ispravka%' then stavke_naloga.iznos else 0 end) as aktiva_trenutno"
+            iz_tabele = "stavke_naloga"
+            join1 = "nalog on stavke_naloga.nalogID=nalog.nalogID"
+            join2 = "konto on stavke_naloga.kontoID=konto.idkonto"
+            where_condition = "stavke_naloga.kontoID=konto.idkonto and konto.oznaka between '000000' and '139999' and nalog.proknjizen='da' and nalog.datum between '{}'".format(
+                datum_pocetni) + " and '{}'".format(datum_krajnji)
+            nivo = 4
+            order_by = "konto.oznaka"
+            connection = Database()
+            sve_konto = connection.select_distinct(select_columns, iz_tabele, join1, join2, where_condition, order_by, nivo)
+            return sve_konto
+        except Error as e:
+            Greske("Dobijanje zavrsnog racuna aktiva tekuce - KontoController.zavrsni_racun_aktiva_tekuce", e)
+
+    def zavrsni_racun_vanbilansna_aktiva_tekuce(self, datum_pocetni, datum_krajnji):
+        try:
+            select_columns = "sum(case when stavke_naloga.status_dp='d' then stavke_naloga.iznos else 0 end) - sum(case when stavke_naloga.status_dp='p' then stavke_naloga.iznos else 0 end) as vanbilansna_pasiva_tekuce"
+            iz_tabele = "stavke_naloga"
+            join1 = "nalog on stavke_naloga.nalogID=nalog.nalogID"
+            join2 = "konto on stavke_naloga.kontoID=konto.idkonto"
+            where_condition = "stavke_naloga.kontoID=konto.idkonto and konto.oznaka between '351100' and '351199' and nalog.proknjizen='da' and nalog.datum between '{}'".format(
+                datum_pocetni) + " and '{}'".format(datum_krajnji)
+            nivo = 4
+            order_by = "konto.oznaka"
+            connection = Database()
+            sve_konto = connection.select_distinct(select_columns, iz_tabele, join1, join2, where_condition, order_by, nivo)
+            return sve_konto
+        except Error as e:
+            Greske("Dobijanje zavrsnog racuna elektronskog vanbilansna aktiva tekuce - KontoController.zavrsni_racun_vanbilansna aktiva_tekuce", e)
+
+    def zavrsni_racun_pasiva_pocetno(self, datum_pocetni, datum_krajnji, godina):
+        try:
+            pocetno = "PS-{}".format(godina)
+            select_columns = "sum(case when stavke_naloga.status_dp='d' and nalog.broj='{}'".format(
+                pocetno) + " then stavke_naloga.iznos else 0 end) - sum(case when stavke_naloga.status_dp='p' and nalog.broj='{}'".format(
+                pocetno) + " then stavke_naloga.iznos else 0 end) as pocetno_prosla_godina"
+            iz_tabele = "stavke_naloga"
+            join1 = "nalog on stavke_naloga.nalogID=nalog.nalogID"
+            join2 = "konto on stavke_naloga.kontoID=konto.idkonto"
+            where_condition = "stavke_naloga.kontoID=konto.idkonto and konto.oznaka between '210000' and '349999' and nalog.proknjizen='da' and nalog.datum between '{}'".format(
+                datum_pocetni) + " and '{}'".format(datum_krajnji)
+            nivo = 4
+            order_by = "konto.oznaka"
+            connection = Database()
+            sve_konto = connection.select_distinct(select_columns, iz_tabele, join1, join2, where_condition,
+                                                   order_by, nivo)
+            return sve_konto
+        except Error as e:
+            Greske("Dobijanje zavrsnog racuna pasiva pocetno - KontoController.zavrsni_racun_pasiva_pocetno", e)
+
+    def zavrsni_racun_vanbilansna_pasiva_pocetno(self, datum_pocetni, datum_krajnji, godina):
+        try:
+            pocetno = "PS-{}".format(godina)
+            select_columns = "sum(case when stavke_naloga.status_dp='d' and nalog.broj='{}'".format(
+                pocetno) + " then stavke_naloga.iznos else 0 end) - sum(case when stavke_naloga.status_dp='p' and nalog.broj='{}'".format(
+                pocetno) + " then stavke_naloga.iznos else 0 end) as pocetno_prosla_godina"
+            iz_tabele = "stavke_naloga"
+            join1 = "nalog on stavke_naloga.nalogID=nalog.nalogID"
+            join2 = "konto on stavke_naloga.kontoID=konto.idkonto"
+            where_condition = "stavke_naloga.kontoID=konto.idkonto and konto.oznaka between '352100' and '352199' and nalog.proknjizen='da' and nalog.datum between '{}'".format(
+                datum_pocetni) + " and '{}'".format(datum_krajnji)
+            nivo = 4
+            order_by = "konto.oznaka"
+            connection = Database()
+            sve_konto = connection.select_distinct(select_columns, iz_tabele, join1, join2, where_condition,
+                                                   order_by, nivo)
+            return sve_konto
+        except Error as e:
+            Greske("Dobijanje zavrsnog racuna elektronskog vanbilansna pasiva pocetno - KontoController.zavrsni_racun_vanbilansna pasiva_pocetno", e)
+
+    def zavrsni_racun_pasiva_tekuce(self, datum_pocetni, datum_krajnji):
+        try:
+            select_columns = "sum(case when stavke_naloga.status_dp='d' then stavke_naloga.iznos else 0 end) - sum(case when stavke_naloga.status_dp='p' then stavke_naloga.iznos else 0 end) as pasiva_tekuce"
+            iz_tabele = "stavke_naloga"
+            join1 = "nalog on stavke_naloga.nalogID=nalog.nalogID"
+            join2 = "konto on stavke_naloga.kontoID=konto.idkonto"
+            where_condition = "stavke_naloga.kontoID=konto.idkonto and konto.oznaka between '210000' and '349999' and nalog.proknjizen='da' and nalog.datum between '{}'".format(
+                datum_pocetni) + " and '{}'".format(datum_krajnji)
+            nivo = 4
+            order_by = "konto.oznaka"
+            connection = Database()
+            sve_konto = connection.select_distinct(select_columns, iz_tabele, join1, join2, where_condition, order_by, nivo)
+            return sve_konto
+        except Error as e:
+            Greske("Dobijanje zavrsnog racuna pasiva tekuce - KontoController.zavrsni_racun_pasiva_tekuce", e)
+
+    def zavrsni_racun_vanbilansna_pasiva_tekuce(self, datum_pocetni, datum_krajnji):
+        try:
+            select_columns = "sum(case when stavke_naloga.status_dp='d' then stavke_naloga.iznos else 0 end) - sum(case when stavke_naloga.status_dp='p' then stavke_naloga.iznos else 0 end) as vanbilansna_pasiva_tekuce"
+            iz_tabele = "stavke_naloga"
+            join1 = "nalog on stavke_naloga.nalogID=nalog.nalogID"
+            join2 = "konto on stavke_naloga.kontoID=konto.idkonto"
+            where_condition = "stavke_naloga.kontoID=konto.idkonto and konto.oznaka between '352100' and '352199' and nalog.proknjizen='da' and nalog.datum between '{}'".format(
+                datum_pocetni) + " and '{}'".format(datum_krajnji)
+            nivo = 4
+            order_by = "konto.oznaka"
+            connection = Database()
+            sve_konto = connection.select_distinct(select_columns, iz_tabele, join1, join2, where_condition, order_by, nivo)
+            return sve_konto
+        except Error as e:
+            Greske("Dobijanje zavrsnog racuna elektronskog vanbilansna pasiva tekuce - KontoController.zavrsni_racun_vanbilansna pasiva_tekuce", e)

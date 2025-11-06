@@ -5,7 +5,8 @@ from racunovodstvo_mvc.controllers.StavkaNalogaController import StavkaNalogaCon
 from racunovodstvo_mvc.controllers.GodinaController import GodinaConnection
 from racunovodstvo_mvc.controllers.KontoController import KontoController
 from datetime import datetime
-
+from decimal import Decimal
+from collections import defaultdict
 
 
 class ZavrsniRacunElektronski:
@@ -27,6 +28,49 @@ class ZavrsniRacunElektronski:
         rezultat = connect.prikazi_podatke_glavna_knjiga(pocetni, krajnji)
         return rezultat
 
+    @staticmethod
+    def svedi_na_hiljade(broj):
+        if 500 < broj < 1000:
+            return 1
+        elif broj >= 1000:
+            return round(broj / 1000)
+        else:
+            return 0
+
+    @staticmethod
+    def apsolutni_iznosi(niz):
+        return [(oznaka, abs(iznos)) for oznaka, iznos in niz]
+
+    @staticmethod
+    def izbaci_vrednost_nula(niz):
+        return [(sifra, abs(vrednost)) for sifra, vrednost in niz if vrednost != Decimal('0.00')]
+
+    @staticmethod
+    def spoj_sve_nizove(*args):
+        rezultat = defaultdict(list)
+
+        if not args:
+            return rezultat
+
+        # Prvi niz je referentni
+        prvi_niz = args[0]
+        kljucevi_prvog = set(k for k, _ in prvi_niz)
+
+        # Dodaj vrednosti iz prvog niza bez nula
+        for k, v in prvi_niz:
+            rezultat[k].append(v)
+
+        # Obradi ostale nizove
+        for niz in args[1:]:
+            for k, v in niz:
+                if k in kljucevi_prvog:
+                    rezultat[k].append(v)
+                else:
+                    rezultat[k].append(0)
+                    rezultat[k].append(v)
+
+        return rezultat
+
     def kreiraj_zavrsni_racun_elektronski(self):
         # postaviti pocetni i krajnji datum zavrsnog racuna na osnovu izabrane godine
         izabrana_godina = self.godina_combo.get()
@@ -43,21 +87,93 @@ class ZavrsniRacunElektronski:
         else:
             # podaci za obrazac 1 - Aktiva
             # Pocetno stanje aktive - preneto iz prethodne godine
-            aktiva = konto_conn.zavrsni_racun_aktiva(pocetni_datum_date, zavrsni_datum_date, izabrana_godina)
-            vanbilansna_aktiva = konto_conn.zavrsni_racun_vanbilansna_aktiva(pocetni_datum_date, zavrsni_datum_date,izabrana_godina)
+            aktiva_pocetno = konto_conn.zavrsni_racun_aktiva_pocetno(pocetni_datum_date, zavrsni_datum_date, izabrana_godina)
+            vanbilansna_aktiva_pocetno = konto_conn.zavrsni_racun_vanbilansna_aktiva_pocetno(pocetni_datum_date, zavrsni_datum_date,izabrana_godina)
             # nizu rezultata aktiva dodajem elemente iz niza vanbilansna aktiva i pravim jednu listu
-            for element in vanbilansna_aktiva:
-                aktiva.append(element)
-            print(aktiva)
+            for element in vanbilansna_aktiva_pocetno:
+                aktiva_pocetno.append(element)
+
+            apsolutni_iznosi_aktiva_pocetno = self.apsolutni_iznosi(aktiva_pocetno)
+            zaokruzeni_aktiva_pocetno = [(konto, self.svedi_na_hiljade(b)) for konto, b in apsolutni_iznosi_aktiva_pocetno]
             # Zavrsno stanje aktive
 
             # podaci za obrazac 1 - Pasiva
+            # Pocetno stanje pasive - preneto iz prethodne godine
+            pasiva_pocetno = konto_conn.zavrsni_racun_pasiva_pocetno(pocetni_datum_date, zavrsni_datum_date, izabrana_godina)
+            vanbilansna_pasiva_pocetno = konto_conn.zavrsni_racun_vanbilansna_pasiva_pocetno(pocetni_datum_date, zavrsni_datum_date, izabrana_godina)
+
+            for element in vanbilansna_pasiva_pocetno:
+                pasiva_pocetno.append(element)
+
+            apsolutni_iznosi_pasiva_pocetno = self.apsolutni_iznosi(pasiva_pocetno)
+            # pretvoriti brojeve u hiljade
+            zaokruzeni_pasiva_pocetno = [(konto, self.svedi_na_hiljade(b)) for konto, b in apsolutni_iznosi_pasiva_pocetno]
+            # Spajanje pocetnog stanja aktiva i pasive
+            aktiva_pasiva_pocetno_ukupno = zaokruzeni_aktiva_pocetno + zaokruzeni_pasiva_pocetno
+            aktiva_pasiva_pocetno = self.izbaci_vrednost_nula(aktiva_pasiva_pocetno_ukupno)
+            print("aktiva pasiva pocetno:")
+            print(aktiva_pasiva_pocetno)
+
+            # Aktiva tekuce stanje
+            aktiva_tekuce_bruto = konto_conn.zavrsni_racun_aktiva_tekuce_bruto(pocetni_datum_date, zavrsni_datum_date)
+            # filtrirati niz i izbaciti elemente kojima je vrednost nula
+            filtrirani_niz_aktiva_tekuce_bruto = self.izbaci_vrednost_nula(aktiva_tekuce_bruto)
+            aktiva_tekuce_bruto_zaokruzeno = [(konto, self.svedi_na_hiljade(b)) for konto, b in filtrirani_niz_aktiva_tekuce_bruto]
+            print("aktiva tekuce bruto:")
+            print(aktiva_tekuce_bruto_zaokruzeno)
+
+            # Aktiva tekuce ispravka vrednosti
+            aktiva_tekuce_ispravka = konto_conn.zavrsni_racun_aktiva_tekuce_ispravka_vrednosti(pocetni_datum_date, zavrsni_datum_date)
+            # filtrirati niz i izbaciti elemente kojima je vrednost nula
+            filtrirani_niz_aktiva_tekuce_ispravka = self.izbaci_vrednost_nula(aktiva_tekuce_ispravka)
+            aktiva_tekuce_ispravka_zaokruzeno = [(konto, self.svedi_na_hiljade(b)) for konto, b in filtrirani_niz_aktiva_tekuce_ispravka]
+            print("aktiva tekuce ispravka vrednosti:")
+            print(aktiva_tekuce_ispravka_zaokruzeno)
+
+            # vanbilansna aktiva tekuce
+            vanbilansna_aktiva_tekuce = konto_conn.zavrsni_racun_vanbilansna_aktiva_tekuce(pocetni_datum_date, zavrsni_datum_date)
+            vanbilansna_aktiva_tekuce_zaokruzeno = [(konto, self.svedi_na_hiljade(b)) for konto, b in vanbilansna_aktiva_tekuce]
+            vanbilansna_aktiva_tekuce_zaokruzeno_filtrirano = self.izbaci_vrednost_nula(vanbilansna_aktiva_tekuce_zaokruzeno)
+            print("vanbilansna aktiva tekuce:")
+            print(vanbilansna_aktiva_tekuce_zaokruzeno_filtrirano)
+
+            # pasiva tekuce - saldo
+            pasiva_tekuce = konto_conn.zavrsni_racun_pasiva_tekuce(pocetni_datum_date, zavrsni_datum_date)
+            apsolutni_iznosi_pasiva_tekuce = self.apsolutni_iznosi(pasiva_tekuce)
+            pasiva_tekuce_zaokruzeno = [(konto, self.svedi_na_hiljade(b)) for konto, b in apsolutni_iznosi_pasiva_tekuce]
+            pasiva_tekuce_zaokruzeno_filtrirano = self.izbaci_vrednost_nula(pasiva_tekuce_zaokruzeno)
+            print("pasiva tekuce vrednosti:")
+            print(pasiva_tekuce_zaokruzeno_filtrirano)
+
+            # vanbilansna pasiva tekuce - saldo
+            vanbilansna_pasiva_tekuce = konto_conn.zavrsni_racun_vanbilansna_pasiva_tekuce(pocetni_datum_date, zavrsni_datum_date)
+            apsolutni_iznosi_vanbilansna_pasiva_tekuce = self.apsolutni_iznosi(vanbilansna_pasiva_tekuce)
+            vanbilansna_pasiva_tekuce_zaokruzeno = [(konto, self.svedi_na_hiljade(b)) for konto, b in apsolutni_iznosi_vanbilansna_pasiva_tekuce]
+            vanbilansna_pasiva_tekuce_zaokruzeno_filtrirano = self.izbaci_vrednost_nula(vanbilansna_pasiva_tekuce_zaokruzeno)
+            print("vanbilansna pasiva tekuce:")
+            print(vanbilansna_pasiva_tekuce_zaokruzeno_filtrirano)
+
+            obrazac1 = self.spoj_sve_nizove(aktiva_pasiva_pocetno, aktiva_tekuce_bruto_zaokruzeno, aktiva_tekuce_ispravka_zaokruzeno, vanbilansna_aktiva_tekuce_zaokruzeno_filtrirano, pasiva_tekuce_zaokruzeno_filtrirano, vanbilansna_pasiva_tekuce_zaokruzeno_filtrirano)
+            print(obrazac1)
+            print("******************************")
+            for kljuc in sorted(obrazac1):
+                print(f"{kljuc}: {obrazac1[kljuc]}")
 
             # podaci za obrazac 5 - Izvestaj o izvrsenju budzeta
-
+            # Treba da pronadjem podatke
+            # izvori = self.pronadji_ukupan_broj_izvora()
+            konto_conn = KontoController()
+            # u ovom nizu se nalaze rashodi - konto 4 cifre i iznos
+            rezultat_rashodi = konto_conn.izvrsenje_budzeta_elektronski_rashodi(pocetni_datum_date, zavrsni_datum_date)
+            # u ovom nizu se nalaze prihodi - konto 4 cifre i iznos
+            rezultat_prihodi = konto_conn.izvrsenje_budzeta_elektronski_prihodi(pocetni_datum_date, zavrsni_datum_date)
+            # nizu rezultata rashoda dodajem elemente iz niza prihodi i pravim jednu listu
+            for element in rezultat_prihodi:
+                rezultat_rashodi.append(element)
+            # pretvoriti brojeve u hiljade
+            zaokruzeni = [(konto, self.svedi_na_hiljade(b)) for konto, b in rezultat_rashodi]
+            print(zaokruzeni)
             # Objediniti sve podatke u jedan niz
-
-
 
 
     def __init__(self, master):
