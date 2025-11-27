@@ -263,7 +263,7 @@ class ZavrsniRacunElektronski:
                 # Kreiraj novu listu sa zamenjenim vrednostima
                 nova_lista = self.mapiranje_zavrsnog(mapirani_aop, zavrsni_racun)
                 jbkjs = self.pronadji_jbkjs()
-                naziv_izvestaja = "GFI-"+ izabrana_godina + "-" + jbkjs + "-1"
+                naziv_izvestaja = "GFI-" + izabrana_godina + "-" + jbkjs + "-1"
                 self.napravi_json_zavrsni(nova_lista, naziv_izvestaja, id_izvestaja)
                 messagebox.showinfo("Uspešno",
                                     "Uspešno je formiran JSON izveštaj " + naziv_izvestaja + ". Možete ga pronaći u folderu racunovodstvo/zavrsni_racun.",
@@ -319,25 +319,11 @@ class ZavrsniRacunElektronski:
 
         self.label_datum_od = Label(self.frame_datumi, text="Završni račun za:")
         self.label_datum_od.grid(row=0, column=0, padx=10, pady=10, sticky='w')
-        '''
-        self.label_datum_do = Label(self.frame_datumi, text="Datum do:")
-        self.label_datum_do.grid(row=0, column=1, padx=10, pady=10, sticky='ew')
-        
-        # Input polje za unos datuma od
-        self.datum_od = DateEntry(self.frame_datumi, selectmode='day', locale='sr_RS',
-                                  date_pattern='dd.MM.yyyy', font="8")
-        self.datum_od.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
-        
-
-        # Input polje za unos datuma do
-        self.datum_do = DateEntry(self.frame_datumi, selectmode='day', locale='sr_RS',
-                                  date_pattern='dd.MM.yyyy', font="8")
-        self.datum_do.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
-        '''
 
         # Definisanje promenjive koja će predstavljati godinu na vrhu glavnog ekrana
         self.godina_combo = ttk.Combobox(self.frame_datumi)
         self.godina_combo.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        self.godina_combo.state(["readonly"])
         self.prikaz_godina()
 
         self.id_dokumenta_label = Label(self.frame_datumi, text="Unesi ID dokumenta:")

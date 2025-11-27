@@ -1,7 +1,6 @@
 from racunovodstvo_mvc.controllers.DimenzijeProzora import DimenzijeProzora
 from tkinter import Toplevel, Frame, Label, Button, messagebox, Entry
 from tkcalendar import DateEntry
-from racunovodstvo_mvc.controllers.StavkaNalogaController import StavkaNalogaController
 from racunovodstvo_mvc.controllers.KontoController import KontoController
 from racunovodstvo_mvc.controllers.KorisnikController import KorisnikController
 from racunovodstvo_mvc.views.aop import Aop
