@@ -1,6 +1,6 @@
 {
     "Header": {
-        "Name": "GFI-2024-41107-1",
+        "Name": "GFI-2024-41107-3",
         "OrganizationStatus": "None",
         "OrganizationStatusChangedDate": null,
         "ReportTypePeriodId": "64",
@@ -34,17 +34,10 @@
             "1070": [
                 2105,
                 2939
-            ]
-        },
-        {
-            "Header": {
-                "Type": 99
-            },
-            "1073": [
-                232
             ],
-            "1240": [
-                232
+            "1073": [
+                232,
+                245
             ]
         },
         {
@@ -96,6 +89,10 @@
             ],
             "1222": [
                 54
+            ],
+            "1240": [
+                232,
+                245
             ],
             "1126": [
                 0,

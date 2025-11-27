@@ -108,11 +108,11 @@ class ZavrsniRacunElektronski:
     # Funkcija za određivanje Type vrednosti
     @staticmethod
     def determine_type(key):
-        if int(key) in range(1001, 1073):
+        if int(key) in range(1001, 1074):
             return 0
-        elif int(key) in range(1074, 1240):
+        elif int(key) in range(1074, 1241):
             return 1
-        elif int(key) in range(5001, 5434):
+        elif int(key) in range(5001, 5435):
             return 5
         else:
             return 99  # fallback
@@ -221,7 +221,8 @@ class ZavrsniRacunElektronski:
                 # vanbilansna aktiva tekuce
                 vanbilansna_aktiva_tekuce = konto_conn.zavrsni_racun_vanbilansna_aktiva_tekuce(pocetni_datum_date, zavrsni_datum_date)
                 vanbilansna_aktiva_tekuce_zaokruzeno = [(konto, self.svedi_na_hiljade(b)) for konto, b in vanbilansna_aktiva_tekuce]
-                vanbilansna_aktiva_tekuce_zaokruzeno_filtrirano = self.izbaci_vrednost_nula(vanbilansna_aktiva_tekuce_zaokruzeno)
+                vanbilansna_aktiva_tekuce_zaokruzeno_filtrirano_cetvrti_nivo = self.izbaci_vrednost_nula(vanbilansna_aktiva_tekuce_zaokruzeno)
+                vanbilansna_aktiva_tekuce_zaokruzeno_filtrirano = [('3510' if k == '3511' else k, v) for k, v in vanbilansna_aktiva_tekuce_zaokruzeno_filtrirano_cetvrti_nivo]
 
                 # pasiva tekuce - saldo
                 pasiva_tekuce = konto_conn.zavrsni_racun_pasiva_tekuce(pocetni_datum_date, zavrsni_datum_date)
@@ -233,10 +234,11 @@ class ZavrsniRacunElektronski:
                 vanbilansna_pasiva_tekuce = konto_conn.zavrsni_racun_vanbilansna_pasiva_tekuce(pocetni_datum_date, zavrsni_datum_date)
                 apsolutni_iznosi_vanbilansna_pasiva_tekuce = self.apsolutni_iznosi(vanbilansna_pasiva_tekuce)
                 vanbilansna_pasiva_tekuce_zaokruzeno = [(konto, self.svedi_na_hiljade(b)) for konto, b in apsolutni_iznosi_vanbilansna_pasiva_tekuce]
-                vanbilansna_pasiva_tekuce_zaokruzeno_filtrirano = self.izbaci_vrednost_nula(vanbilansna_pasiva_tekuce_zaokruzeno)
+                vanbilansna_pasiva_tekuce_zaokruzeno_filtrirano_cetvrti_nivo = self.izbaci_vrednost_nula(vanbilansna_pasiva_tekuce_zaokruzeno)
+                vanbilansna_pasiva_tekuce_zaokruzeno_filtrirano = [('3520' if k == '3521' else k, v) for k, v in vanbilansna_pasiva_tekuce_zaokruzeno_filtrirano_cetvrti_nivo]
 
                 obrazac1 = self.spoj_sve_nizove(aktiva_pasiva_pocetno, aktiva_tekuce_bruto_zaokruzeno, aktiva_tekuce_ispravka_zaokruzeno, vanbilansna_aktiva_tekuce_zaokruzeno_filtrirano, pasiva_tekuce_zaokruzeno_filtrirano, vanbilansna_pasiva_tekuce_zaokruzeno_filtrirano)
-
+                
                 # podaci za obrazac 5 - Izvestaj o izvrsenju budzeta
                 # Treba da pronadjem podatke
                 # izvori = self.pronadji_ukupan_broj_izvora()

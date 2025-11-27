@@ -1,7 +1,7 @@
 from tkinter import Button, LabelFrame
 from racunovodstvo_mvc.views.stanje_konta import StanjeKonta
 from racunovodstvo_mvc.views.kartica_konta import KarticaKonta
-from racunovodstvo_mvc.views.izvrsenje_budzeta import IzvrsenjeBudzeta
+# from racunovodstvo_mvc.views.izvrsenje_budzeta import IzvrsenjeBudzeta
 from racunovodstvo_mvc.views.zakljucni_list import ZakljucniList
 from racunovodstvo_mvc.views.dnevnik_knjizenja import DnevnikKnjizenja
 from racunovodstvo_mvc.views.glavna_knjiga import GlavnaKnjiga
@@ -20,8 +20,12 @@ class Izvestaji:
     def __otvori_kartica_konta(self):
         KarticaKonta(self.master)
 
+    '''
+    ========  OVO SAM PRIVREMENO ISKLJUCIO - TREBALO BI JOS MALO DA SE DORADI ===
+    
     def __otvori_izvrsenje_budzeta(self):
-        IzvrsenjeBudzeta(self.master)
+    IzvrsenjeBudzeta(self.master)
+    '''
 
     def __otvori_zakljucni_list(self):
         ZakljucniList(self.master)
@@ -52,19 +56,22 @@ class Izvestaji:
         self.stanje_konta.grid(row=0, column=0, padx=(10, 1), pady=10, sticky="w")
         self.kartica_konta = Button(self.izvestaji_frame, text="Kartica konta", command=self.__otvori_kartica_konta, bg="#265073", fg="white")
         self.kartica_konta.grid(row=0, column=1, pady=10, sticky="w")
+        '''
+        ==== OVO JE PRIVREMENO ISKLJUCENO - TREBALO BI JOS MALO DA SE DORADI (KADA SE RADI IZVRSENJE BUDZETA DO 31.12. ONDA STAVKE BUDU NULA JER JE STANJE SRAVNJENO)
         self.izvrsenje_budzeta = Button(self.izvestaji_frame, text="Izvršenje budžeta", command=self.__otvori_izvrsenje_budzeta, bg="#265073", fg="white")
         self.izvrsenje_budzeta.grid(row=0, column=2, padx=(1, 1), pady=10, sticky="w")
+        '''
         self.zakljucni_list = Button(self.izvestaji_frame, text="Zaključni list", command=self.__otvori_zakljucni_list, bg="#265073", fg="white")
-        self.zakljucni_list.grid(row=0, column=3, pady=10, sticky="w")
+        self.zakljucni_list.grid(row=0, column=2, pady=10, sticky="w")
         self.dnevnik_knjizenja = Button(self.izvestaji_frame, text="Dnevnik knjiženja", command=self.__otvori_dnevnik_knjizenja, bg="#265073", fg="white")
-        self.dnevnik_knjizenja.grid(row=0, column=4, padx=1, pady=10, sticky="w")
+        self.dnevnik_knjizenja.grid(row=0, column=3, padx=1, pady=10, sticky="w")
         self.glavna_knjiga = Button(self.izvestaji_frame, text="Glavna knjiga", command=self.__otvori_glavnu_knjigu, bg="#265073", fg="white")
-        self.glavna_knjiga.grid(row=0, column=5, pady=10, sticky="w")
+        self.glavna_knjiga.grid(row=0, column=4, pady=10, sticky="w")
         self.knjiga_dobavljaca = Button(self.izvestaji_frame, text="Knjiga dobavljača", command=self.__otvori_knjigu_dobavljaca, bg="#265073", fg="white")
-        self.knjiga_dobavljaca.grid(row=0, column=6, pady=10, sticky="w")
+        self.knjiga_dobavljaca.grid(row=0, column=5, pady=10, sticky="w")
         self.placeni_avansi = Button(self.izvestaji_frame, text="Plaćeni avansi", command=self.__otvori_placene_avanse, bg="#265073", fg="white")
-        self.placeni_avansi.grid(row=0, column=7, padx=1, pady=10, sticky="w")
+        self.placeni_avansi.grid(row=0, column=6, padx=1, pady=10, sticky="w")
         self.izvrsenje_budzeta_elektronski = Button(self.izvestaji_frame, text="Izvršenje budžeta - elektronski", command=self.__otvori_izvrsenje_budzeta_elektronski, bg="#4f7fa3", fg="white")
-        self.izvrsenje_budzeta_elektronski.grid(row=0, column=8, pady=10, sticky="w")
+        self.izvrsenje_budzeta_elektronski.grid(row=0, column=7, pady=10, sticky="w")
         self.zavrsni_racun_elektronski = Button(self.izvestaji_frame, text="Završni račun - elektronski", command=self.__otvori_zavrsni_racun_elektronski, bg="#4f7fa3", fg="white")
-        self.zavrsni_racun_elektronski.grid(row=0, column=9, padx=1, pady=10, sticky="w")
+        self.zavrsni_racun_elektronski.grid(row=0, column=8, padx=1, pady=10, sticky="w")

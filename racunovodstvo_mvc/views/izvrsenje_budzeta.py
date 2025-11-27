@@ -8,6 +8,9 @@ import os
 import locale
 import tkinter as tk
 
+'''
+===============================  OVO JE PRIVREMENO ISKLJUCENO - TREBALO BI JOS MALO DA SE DORADI (kada se radi izvestaj do 31.12. stavke budu nula jer je stanje sravnjeno) =======
+'''
 
 # Polje sa dugmadima za izvestaje
 class IzvrsenjeBudzeta:
@@ -148,17 +151,7 @@ class IzvrsenjeBudzeta:
         # window_height = self.master.winfo_screenheight() - 420
         screen_width = self.master.winfo_screenwidth()
         screen_height = self.master.winfo_screenheight()
-        '''
-        if self.master.winfo_screenwidth() < 1400:
-            window_width = self.master.winfo_screenwidth() - 200
-        else:
-            window_width = self.master.winfo_screenwidth() - 800
 
-        if self.master.winfo_screenheight() < 800:
-            window_height = self.master.winfo_screenheight() - 200
-        else:
-            window_height = self.master.winfo_screenheight() - 420
-        '''
         dimenzije = DimenzijeProzora(screen_width, screen_height)
         window_width = dimenzije.odredi_sirinu_dnevnik_izvrsenje()
         window_height = dimenzije.odredi_visinu_izvrsenje()
