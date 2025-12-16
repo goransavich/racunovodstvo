@@ -5,6 +5,7 @@ from racunovodstvo_mvc.controllers.KontoController import KontoController
 from racunovodstvo_mvc.controllers.StavkaNalogaController import StavkaNalogaController
 import tkinter as tk
 
+
 class Dobavljaci:
     # Provera koja tastatura se koristi za unos, ako je cirilica vratiti upozorenje, jer mogu samo da se unose latinicna slova- zbog stampe PDF
     def __proveri_jezik_dobavljac(self, event):
@@ -25,8 +26,9 @@ class Dobavljaci:
     # Selektovanje izabranog reda u tabeli - Dobavljaci
     def izaberi_red_dobavljaca(self, e):
         # Prvo isprazniti polja
-        self.pib_dobavljaca_entry.delete(0, 'end')
-        self.naziv_dobavljaca_entry.delete(0, 'end')
+        self.ocisti_polja_dobavljaca()
+        # self.pib_dobavljaca_entry.delete(0, 'end')
+        # self.naziv_dobavljaca_entry.delete(0, 'end')
         # Uzeti identifikator reda
         selected = self.my_tree_dobavljaci.focus()
         # Uzamanje vrednosti iz izabranog reda
@@ -36,6 +38,8 @@ class Dobavljaci:
             # Prikaz vrednosti u entry poljima
             self.pib_dobavljaca_entry.insert(0, values[2])
             self.naziv_dobavljaca_entry.insert(0, values[1])
+            self.mesto_dobavljaca_entry.insert(0, values[3])
+            self.adresa_dobavljaca_entry.insert(0, values[4])
         except IndexError:
             pass
 
@@ -43,42 +47,50 @@ class Dobavljaci:
     def prikaz_svih_dobavljaca(self):
         # povezivanje na bazu i preuzimanje konta iz tabele
         rezultat = self.ucitaj_sve_dobavljace()
-        # global count_konto
+        # zamena None vrednosti sa praznim stringom, zbog prikaza u tabeli
+        niz = [["" if x is None else x for x in sub] for sub in rezultat]
         count_dobavljac = 0
 
-        for record in rezultat:
+        for record in niz:
             redni_broj = count_dobavljac + 1
             if count_dobavljac % 2 == 0:
                 self.my_tree_dobavljaci.insert(parent='', index='end', iid=record[0], text='',
-                                               values=(redni_broj, record[1], record[2]),
+                                               values=(redni_broj, record[1], record[2], record[4], record[5]),
                                                tags=('evenrow',))
             else:
                 self.my_tree_dobavljaci.insert(parent='', index='end', iid=record[0], text='',
-                                               values=(redni_broj, record[1], record[2]),
+                                               values=(redni_broj, record[1], record[2], record[4], record[5]),
                                                tags=('oddrow',))
             count_dobavljac += 1
 
-    def dobavljac_postoji(self, pib):
+    @staticmethod
+    def dobavljac_postoji(pib):
         conn = DobavljacController()
         return conn.pronadji_dobavljaca(pib)
 
-    def pronadji_poslednji_slog_konto(self):
+    @staticmethod
+    def pronadji_poslednji_slog_konto():
         conn = KontoController()
         return conn.pronadji_poslednji_konto()[0][0]
 
-    def unesi_dobavljaca_u_bazu(self, pib, naziv, id_konta):
+    @staticmethod
+    def unesi_dobavljaca_u_bazu(pib, naziv, id_konta, mesto, adresa):
         conn = DobavljacController()
-        conn.unos_dobavljaca_u_tabelu(pib, naziv, id_konta)
+        conn.unos_dobavljaca_u_tabelu(pib, naziv, id_konta, mesto, adresa)
 
     # Očisti polja za unos Dobavljaca
     def ocisti_polja_dobavljaca(self):
         self.pib_dobavljaca_entry.delete(0, 'end')
         self.naziv_dobavljaca_entry.delete(0, 'end')
+        self.mesto_dobavljaca_entry.delete(0, 'end')
+        self.adresa_dobavljaca_entry.delete(0, 'end')
 
     # Unos dobavljaca
     def unos_dobavljaca(self):
         pib_dobavljaca = str(self.pib_dobavljaca_entry.get())
         naziv_dobavljaca = self.naziv_dobavljaca_entry.get()
+        mesto_dobavljaca = self.mesto_dobavljaca_entry.get()
+        adresa_dobavljaca = self.adresa_dobavljaca_entry.get()
         # Provera da li je polje za unos prazno
         if naziv_dobavljaca == '' or pib_dobavljaca == '':
             messagebox.showwarning("Greška", "Morate popuniti sva polja!", parent=self.prozor_unos_dobavljaca)
@@ -102,6 +114,8 @@ class Dobavljaci:
                     # Brisanje entry polja nakon unosa dobavljaca
                     self.pib_dobavljaca_entry.delete(0, 'end')
                     self.naziv_dobavljaca_entry.delete(0, 'end')
+                    self.mesto_dobavljaca_entry.delete(0, 'end')
+                    self.adresa_dobavljaca_entry.delete(0, 'end')
                     self.pib_dobavljaca_entry.focus()
                     # Brisanje tabele zbog azuriranja novog konta i dobavljaca
                     self.my_tree_dobavljaci.delete(*self.my_tree_dobavljaci.get_children())
@@ -110,7 +124,7 @@ class Dobavljaci:
                     id_konta_dobavljaca = self.pronadji_poslednji_slog_konto()
                     # unesi dobavljaca u tabelu dobavljaci
                     try:
-                        self.unesi_dobavljaca_u_bazu(pib_dobavljaca, naziv_dobavljaca, id_konta_dobavljaca)
+                        self.unesi_dobavljaca_u_bazu(pib_dobavljaca, naziv_dobavljaca, id_konta_dobavljaca, mesto_dobavljaca, adresa_dobavljaca)
                         self.prikaz_svih_dobavljaca()
                     except ValueError:
                         messagebox.showinfo("Greška", "Hmmmmm prilikom unosa dobavljača, pokušajte ponovo!", parent=self.prozor_unos_dobavljaca)
@@ -118,13 +132,15 @@ class Dobavljaci:
                 messagebox.showinfo("Greška", "PIB mora da sadrži 9 cifara!", parent=self.prozor_unos_dobavljaca)
 
     # pronadji id konta od izabranog dobavljaca koji se azurira
-    def pronadji_id_konta_dobavljaca(self, pib):
+    @staticmethod
+    def pronadji_id_konta_dobavljaca(pib):
         conn_dobavljac = DobavljacController()
         rezultat = conn_dobavljac.pronadji_dobavljaca_svi_podaci(pib)
         return rezultat[0][3]
 
     # kada se azurira naziv dobavljaca u tabeli dobavljaci, istovremeno se azurira i konto dobavljaca u tabeli konto
-    def azuriraj_naziv_u_tabeli_konta(self, idkonta, naziv_dobavljaca):
+    @staticmethod
+    def azuriraj_naziv_u_tabeli_konta(idkonta, naziv_dobavljaca):
         conn_konto = KontoController()
         oznaka_konta = "252111-{}".format(naziv_dobavljaca)
         conn_konto.update_konto(oznaka_konta, naziv_dobavljaca, idkonta)
@@ -139,6 +155,8 @@ class Dobavljaci:
             id_tabele_konta = str(self.pronadji_id_konta_dobavljaca(izabran_pib))
             promenjen_pib = self.pib_dobavljaca_entry.get()
             promenjen_naziv_dobavljaca = self.naziv_dobavljaca_entry.get()
+            promenjeno_mesto = self.mesto_dobavljaca_entry.get()
+            promenjena_adresa = self.adresa_dobavljaca_entry.get()
 
             # Ovde se prvo proverava da li je se menja PIB - ne sme se menjati pib
             if izabran_pib == promenjen_pib:
@@ -146,7 +164,7 @@ class Dobavljaci:
                 try:
                     # povezivanje na bazu i azuriranje dobavljaca iz tabele
                     conn = DobavljacController()
-                    conn.update_dobavljaca(promenjen_naziv_dobavljaca, selected)
+                    conn.update_dobavljaca(promenjen_naziv_dobavljaca, selected, promenjeno_mesto, promenjena_adresa)
                     # povezivanje na bazu i azuriranje dobavljaca u tabeli konta, npr 252111-telek.
                     self.azuriraj_naziv_u_tabeli_konta(id_tabele_konta, promenjen_naziv_dobavljaca)
                     # Brisanje entry polja nakon azuriranja dobavljaca
@@ -166,7 +184,8 @@ class Dobavljaci:
         else:
             messagebox.showwarning("Greška", "Hmmmm niste odabrali ni jednog dobavljača!", parent=self.prozor_unos_dobavljaca)
 
-    def pronadji_konta_u_stavkama_naloga(self, konto_id):
+    @staticmethod
+    def pronadji_konta_u_stavkama_naloga(konto_id):
         konekcija_stavke_naloga = StavkaNalogaController()
         return len(konekcija_stavke_naloga.koliko_konta_u_stavkama(konto_id))
 
@@ -208,8 +227,8 @@ class Dobavljaci:
         self.prozor_unos_dobavljaca.attributes('-topmost', 'true')
         self.prozor_unos_dobavljaca.grab_set()
         self.prozor_unos_dobavljaca.title("Pregled i unos dobavljaca")
-        self.prozor_unos_dobavljaca.geometry("800x600")
-        self.prozor_unos_dobavljaca.resizable(0, 0)
+        self.prozor_unos_dobavljaca.geometry("1200x600")
+        self.prozor_unos_dobavljaca.resizable(False, False)
         self.prozor_unos_dobavljaca.columnconfigure(0, weight=1)
         self.prozor_unos_dobavljaca.rowconfigure(0, weight=4)
         self.prozor_unos_dobavljaca.rowconfigure(1, weight=1)
@@ -237,11 +256,13 @@ class Dobavljaci:
         # Kreiranje canvasa za tabelu jer ne moze scroll bar da ide na Frame ili LabelFrame
         self.my_tree_dobavljaci = ttk.Treeview(self.canvas_pregled_dobavljaca)
         self.my_tree_dobavljaci.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
-        self.my_tree_dobavljaci['columns'] = ("Rb", "Naziv", "PIB")
+        self.my_tree_dobavljaci['columns'] = ("Rb", "Naziv", "PIB", "Mesto", "Adresa")
         self.my_tree_dobavljaci.column("#0", width=0, stretch=False)
-        self.my_tree_dobavljaci.column("Rb", anchor=tk.W, minwidth=10)
-        self.my_tree_dobavljaci.column("Naziv", anchor=tk.W, minwidth=500)
-        self.my_tree_dobavljaci.column("PIB", anchor=tk.W, minwidth=160)
+        self.my_tree_dobavljaci.column("Rb", anchor=tk.W, stretch=False, minwidth=10)
+        self.my_tree_dobavljaci.column("Naziv", anchor=tk.W, minwidth=200)
+        self.my_tree_dobavljaci.column("PIB", anchor=tk.W, stretch=False, minwidth=30)
+        self.my_tree_dobavljaci.column("Mesto", anchor=tk.W, minwidth=80)
+        self.my_tree_dobavljaci.column("Adresa", anchor=tk.W, minwidth=120)
 
         # Kreiranje vertikalnog scroll bara za tabelu
         self.treeDobavljaciScroll = ttk.Scrollbar(self.canvas_pregled_dobavljaca)
@@ -253,6 +274,8 @@ class Dobavljaci:
         self.my_tree_dobavljaci.heading("Rb", anchor=tk.W, text="Rb")
         self.my_tree_dobavljaci.heading("Naziv", anchor=tk.W, text="Naziv")
         self.my_tree_dobavljaci.heading("PIB", anchor=tk.W, text="PIB")
+        self.my_tree_dobavljaci.heading("Mesto", anchor=tk.W, text="Mesto")
+        self.my_tree_dobavljaci.heading("Adresa", anchor=tk.W, text="Adresa")
 
         # Odredjivanje boje u redovima tabele - bela i plava, parni i neparni red
         self.my_tree_dobavljaci.tag_configure('oddrow', background="white")
@@ -268,6 +291,7 @@ class Dobavljaci:
         self.entry_dobavljac.columnconfigure(2, weight=1)
         self.entry_dobavljac.columnconfigure(3, weight=1)
         self.entry_dobavljac.rowconfigure(0, weight=1)
+        self.entry_dobavljac.rowconfigure(1, weight=1)
 
         self.pib_dobavljaca_label = Label(self.entry_dobavljac, text="PIB:")
         self.pib_dobavljaca_label.grid(row=0, column=0, padx=10, pady=10, sticky='e')
@@ -281,6 +305,20 @@ class Dobavljaci:
         self.naziv_dobavljaca_entry = Entry(self.entry_dobavljac)
         self.naziv_dobavljaca_entry.grid(row=0, column=3, padx=10, pady=10, sticky='ew')
         self.naziv_dobavljaca_entry.bind("<KeyRelease>", self.__proveri_jezik_dobavljac)
+
+        self.mesto_dobavljaca_label = Label(self.entry_dobavljac, text="Mesto:")
+        self.mesto_dobavljaca_label.grid(row=1, column=0, padx=10, pady=10, sticky='e')
+
+        self.mesto_dobavljaca_entry = Entry(self.entry_dobavljac)
+        self.mesto_dobavljaca_entry.grid(row=1, column=1, padx=10, pady=10, sticky='ew')
+        self.mesto_dobavljaca_entry.bind("<KeyRelease>", self.__proveri_jezik_dobavljac)
+
+        self.adresa_dobavljaca_label = Label(self.entry_dobavljac, text="Ulica i broj:")
+        self.adresa_dobavljaca_label.grid(row=1, column=2, padx=10, pady=10, sticky='e')
+
+        self.adresa_dobavljaca_entry = Entry(self.entry_dobavljac)
+        self.adresa_dobavljaca_entry.grid(row=1, column=3, padx=10, pady=10, sticky='ew')
+        self.adresa_dobavljaca_entry.bind("<KeyRelease>", self.__proveri_jezik_dobavljac)
 
         # Treci label frame - dugmad za unos, brisanje ...
         self.polje_dugmad_dobavljac = LabelFrame(self.prozor_unos_dobavljaca, text="Komande", bg="lightblue")
@@ -314,3 +352,4 @@ class Dobavljaci:
 
         # Selektovanje reda iz tabele klikom na slog
         self.my_tree_dobavljaci.bind("<ButtonRelease-1>", self.izaberi_red_dobavljaca)
+    

@@ -1,4 +1,1 @@
 
-Dobijanje stanje konta po kategorijama - KontoController, 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ', c, a, s, e,  , w, h, e, n,  , s, t, a, v, k, e, _, n, a, l, o, g, a, ., s, t, ' at line 1 ,23.10.2025.
-Dobijanje stanje konta po kategorijama - KontoController, 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ', c, a, s, e,  , w, h, e, n,  , s, t, a, v, k, e, _, n, a, l, o, g, a, ., s, t, ' at line 1 ,23.10.2025.
-Dobijanje zavrsnog racuna elektronskog - KontoController.zavrsni_racun_elektronski, 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'konto.oznaka between '351111' and '351199' and nalog.proknjizen='da' and nalog.d' at line 1 ,31.10.2025.

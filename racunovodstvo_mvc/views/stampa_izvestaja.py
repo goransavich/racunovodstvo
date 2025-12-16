@@ -1051,5 +1051,80 @@ class StampaIzvestaja:
 
         webbrowser.open_new(r'efaktura.pdf')
 
+    def stampa_ios_dobavljaci(self, rezultat_stavke, oznaka_konta_izvestaj):
+        locale.setlocale(locale.LC_ALL, 'de_DE')
+        pdf = PDF('portrait', 'cm', 'A4')
+        pdf.alias_nb_pages()
+        # pdf.accept_page_break()
+        pdf.add_page()
+        ukupno_duguje = 0
+        ukupno_potrazuje = 0
+        for record in rezultat_stavke:
+            ukupno_duguje = record[1] + record[3]
+            ukupno_potrazuje = record[2] + record[4]
+            # Racunanje salda naloga duguje/potrazuje
+
+
+        '''
+        duguje_prikaz = locale.format_string('%10.2f', duguje, grouping=True)
+        potrazuje_prikaz = locale.format_string('%10.2f', potrazuje, grouping=True)
+
+        saldo = duguje - potrazuje
+        
+        saldo_ukupno = saldo
+        saldo_ukupno_formatiran = locale.format_string('%10.2f', saldo_ukupno, grouping=True)
+        oznaka_konta_za_stampu = self.zamena_slova(oznaka_konta_izvestaj)
+        today = date.today()
+        danasnji_datum = today.strftime("%d.%m.%Y")
+        pdf.set_font('Helvetica', '', 11)
+        # pdf.cell(13, 1, firma, 0, 0, 'L')
+        pdf.cell(16, 1, 'Datum stampe:', 0, 0, 'R')
+        pdf.cell(3, 1, danasnji_datum + ".", 0, 1, 'L')
+        # pdf.cell(19, 1, 'Strana: ' + str(pdf.page_no()), 0, 1, 'R')
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.cell(19, 1, 'Kartica konta: ' + oznaka_konta_za_stampu, 0, 1, 'C')
+        pdf.set_font('Helvetica', '', 10)
+        pdf.cell(2, 0.7, 'Duguje:', 0, 0, 'L')
+        pdf.cell(6, 0.7, duguje_prikaz, 0, 1, 'R')
+        pdf.cell(2, 0.7, 'Potrazuje:', 0, 0, 'L')
+        pdf.cell(6, 0.7, potrazuje_prikaz, 0, 1, 'R')
+        pdf.cell(2, 0.7, 'Saldo:', 0, 0, 'L')
+        pdf.cell(6, 0.7, saldo_ukupno_formatiran, 0, 1, 'R')
+        #pdf.line(1, 7, 20, 7)
+        pdf.set_fill_color(221, 221, 221)
+        pdf.set_font('Helvetica', 'B', 10)
+        pdf.cell(4, 1, 'Broj naloga', 0, 0, 'C', fill=True)
+        pdf.cell(6, 1, 'Datum naloga', 0, 0, 'C', fill=True)
+        pdf.cell(4, 1, 'Duguje', 0, 0, 'R', fill=True)
+        pdf.cell(4, 1, 'Potrazuje', 0, 1, 'R', fill=True)
+        #pdf.line(1, 8, 20, 8)
+        pdf.set_font('Helvetica', '', 10)
+
+        for red in rezultat_stavke:
+
+            pdf.cell(4, 0.5, red[1], 0, 0, 'C')
+            pdf.cell(6, 0.5, red[2].strftime("%d.%m.%Y"), 0, 0, 'C')
+            if red[4] == 'd':
+                pdf.cell(4, 0.5, locale.format_string('%10.2f', red[3], grouping=True), 0, 0, 'R')
+                pdf.cell(4, 0.5, '', 0, 1, 'R')
+
+            else:
+                pdf.cell(4, 0.5, '', 0, 0, 'R')
+                pdf.cell(4, 0.5, locale.format_string('%10.2f', red[3], grouping=True), 0, 1, 'R')
+
+        # Ukupno za nalog
+        pdf.set_font('Helvetica', 'B', 12)
+        pdf.cell(4, 1, 'Ukupno:', 0, 0, 'L', fill=True)
+        pdf.cell(6, 1, '', 0, 0, 'L', fill=True)
+        pdf.cell(4, 1, duguje_prikaz, 0, 0, 'R', fill=True)
+        pdf.cell(4, 1, potrazuje_prikaz, 0, 1, 'R', fill=True)
+        pdf.ln(2)
+
+        # pdf.cell(5, 1, kontirao, 0, 1, 'C')
+        pdf.output('kartica.pdf', 'F')
+
+        webbrowser.open_new(r'kartica.pdf')
+        '''
+
 
 

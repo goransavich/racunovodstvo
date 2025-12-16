@@ -2,6 +2,7 @@ from tkinter import Toplevel, LabelFrame, Frame, Canvas, ttk, Label, Button, mes
 from tkcalendar import DateEntry
 from racunovodstvo_mvc.controllers.KontoController import KontoController
 from racunovodstvo_mvc.controllers.DimenzijeProzora import DimenzijeProzora
+from racunovodstvo_mvc.views.stampa_izvestaja import StampaIzvestaja
 import locale
 import tkinter as tk
 import xlsxwriter
@@ -175,6 +176,19 @@ class KnjigaDobavljaca:
         except:
             messagebox.showwarning("Greška", "Morate zatvoriti prethodni excel izveštaj!", parent=self.prozor_knjiga_dobavljaca)
 
+    def napravi_ios(self):
+        try:
+            pocetni = self.datum_od.get_date()
+            krajnji = self.datum_do.get_date()
+            rezultat = self.__izvuci_pomocnu_knjigu_dobavljaca(pocetni, krajnji)
+            konvertovan_rezultat = self.__konvertuj_none_nula(rezultat)
+            print(konvertovan_rezultat)
+            stampa = StampaIzvestaja()
+            # Eksportovati IOS u PDF
+            # self.pravljenje_excel_izvestaja(konvertovan_rezultat, pocetni, krajnji)
+        except:
+            messagebox.showwarning("Greška", "Morate zatvoriti prethodno otvoreni IOS!", parent=self.prozor_knjiga_dobavljaca)
+
     def __init__(self, master):
         self.master = master
         self.prozor_knjiga_dobavljaca = Toplevel(self.master)
@@ -281,6 +295,17 @@ class KnjigaDobavljaca:
         self.tree_tabela_knjiga_dobavljaca.heading("Ukupno potražuje", anchor=tk.CENTER, text="Ukupno potražuje")
         self.tree_tabela_knjiga_dobavljaca.heading("Saldo duguje", anchor=tk.CENTER, text="Saldo duguje")
         self.tree_tabela_knjiga_dobavljaca.heading("Saldo potražuje", anchor=tk.CENTER, text="Saldo potražuje")
-        # Treci frame dugme za štampu
-        self.dugme_za_stampu = Button(self.prozor_knjiga_dobavljaca, text="Eksport u excel", bg="#265073", fg="white", command=self.exportuj_knjigu_dobavljaca)
-        self.dugme_za_stampu.grid(row=2, column=0)
+
+        # Treci frame ####################
+        self.treci_frame = Frame(self.prozor_knjiga_dobavljaca)
+        self.treci_frame.grid(row=2, column=0, padx=10, pady=10, sticky='nsew')
+        self.treci_frame.columnconfigure(0, weight=1)
+        self.treci_frame.columnconfigure(1, weight=1)
+        self.treci_frame.rowconfigure(0, weight=1)
+        # dugme za štampu
+        self.dugme_za_stampu = Button(self.treci_frame, text="Eksport u excel", bg="#265073", fg="white", command=self.exportuj_knjigu_dobavljaca)
+        self.dugme_za_stampu.grid(row=0, column=0, sticky="e")
+        # dugme za formiranje IOS-a
+        self.dugme_za_ios_dobavljaci = Button(self.treci_frame, text="Napravi IOS", bg="#265073", fg="white", command=self.napravi_ios)
+        self.dugme_za_ios_dobavljaci.grid(row=0, column=1, padx=5, sticky="w")
+

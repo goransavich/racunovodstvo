@@ -49,9 +49,9 @@ class DimenzijeProzora:
     # Visina prozora Zakljucni list
     def odredi_visinu_zakljucni_list(self):
         if self.screen_height < 800:
-            return self.screen_height - 140
+            return self.screen_height - 100
         else:
-            return self.screen_height - 400
+            return self.screen_height - 360
 
     # Sirina prozora Kreiran nalog
     def odredi_sirinu_kreiran_nalog(self):

@@ -825,10 +825,24 @@ class Nalozi:
         else:
             return None
 
+    def pronadji_adresu_dobavljaca(self, root, namespace):
+        endpoint_id = root.find('.//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:StreetName', namespace)
+        if endpoint_id is not None:
+            return self.convert_u_latinicu(endpoint_id.text)
+        else:
+            return None
+
+    def pronadji_mesto_dobavljaca(self, root, namespace):
+        endpoint_id = root.find('.//cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CityName', namespace)
+        if endpoint_id is not None:
+            return self.convert_u_latinicu(endpoint_id.text)
+        else:
+            return None
+
     @staticmethod
-    def unesi_dobavljaca_u_bazu(pib, naziv, id_konta):
+    def unesi_dobavljaca_u_bazu(pib, naziv, id_konta, mesto, adresa):
         conn = DobavljacController()
-        conn.unos_dobavljaca_u_tabelu(pib, naziv, id_konta)
+        conn.unos_dobavljaca_u_tabelu(pib, naziv, id_konta, mesto, adresa)
 
     @staticmethod
     def pronadji_poslednji_slog_konto():
@@ -888,6 +902,8 @@ class Nalozi:
                 id_konta_131211 = pronadji_id_konta[0][0]
                 # pronaci naziv dobavljaca
                 naziv_dobavljaca = self.pronadji_naziv_dobavljaca(root, namespaces)[:40]
+                adresa_dobavljaca = self.pronadji_adresu_dobavljaca(root, namespaces)
+                mesto_dobavljaca = self.pronadji_mesto_dobavljaca(root, namespaces)
                 # naziv_dobavljaca_latin = self.convert_u_latinicu(naziv_dobavljaca)
                 # pronaci iznos fakture
                 iznos_fakture = self.pronadji_iznos_fakture(root, namespaces)
@@ -924,7 +940,7 @@ class Nalozi:
                     # pronadji poslednji red u tabeli konto da se dobije ID ovog konta
                     id_konta_dobavljaca = self.pronadji_poslednji_slog_konto()
                     try:
-                        self.unesi_dobavljaca_u_bazu(pib, naziv_dobavljaca_upis_u_bazu, id_konta_dobavljaca)
+                        self.unesi_dobavljaca_u_bazu(pib, naziv_dobavljaca_upis_u_bazu, id_konta_dobavljaca, mesto_dobavljaca, adresa_dobavljaca)
                     except ValueError:
                         messagebox.showinfo("Greška", "Hmmmmm prilikom unosa dobavljača, pokušajte ponovo!",
                                             parent=self.prozor_unos_naloga)

@@ -36,19 +36,19 @@ class DobavljacController:
         except Error as e:
             Greske("Greska pronadji dobavljaca svi podaci - DobavljaciController", e)
 
-    def unos_dobavljaca_u_tabelu(self, pib, naziv, idkonta):
+    def unos_dobavljaca_u_tabelu(self, pib, naziv, idkonta, mesto, adresa):
         try:
-            schema = "naziv, pib, id_konta"
-            value = (naziv, pib, idkonta)
+            schema = "naziv, pib, id_konta, mesto, adresa"
+            value = (naziv, pib, idkonta, mesto, adresa)
             connection = Database()
             connection.insert(self.tablename, schema, value)
         except Error as e:
             Greske("Greska unos dobavljaca u tabelu dobavljaci - DobavljacController", e)
 
-    def update_dobavljaca(self, naziv, id_dobavljaca):
+    def update_dobavljaca(self, naziv, id_dobavljaca, mesto, adresa):
         # Ažuriranje baze podataka
         try:
-            set_condition = 'naziv="{}"'.format(naziv)
+            set_condition = 'naziv="{}"'.format(naziv) + ', mesto="{}"'.format(mesto) + ', adresa="{}"'.format(adresa)
             filter_condition = ' iddobavljaci=' + id_dobavljaca
             connection = Database()
             connection.update(self.tablename, set_condition, filter_condition)
