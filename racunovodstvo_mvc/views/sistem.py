@@ -12,6 +12,7 @@ from datetime import datetime
 import subprocess
 import zipfile
 import webbrowser
+import cyrtranslit
 import os
 
 
@@ -24,6 +25,10 @@ class Sistem:
         for i in rezultat:
             sve_godine.append(i[1])
         self.entry_prebacivanje_pocetnog['values'] = sve_godine
+
+    @staticmethod
+    def convert_u_latinicu(tekst):
+        return cyrtranslit.to_latin(tekst)
 
     def unos_godine(self):
         nova_godina = self.entry_otvaranje_godine.get()
@@ -164,12 +169,12 @@ class Sistem:
 
     def poslednji_bekap(self):
         try:
-            bekap=BekapController()
+            bekap = BekapController()
             rezultat = bekap.find_last()
             if len(rezultat) == 0:
                 self.datum_poslednjeg_bekapa.set('Još uvek nije radjen bekap podataka')
             else:
-                vreme_poslednjeg_bekapa=rezultat[0][1].strftime("%d.%m.%Y, %H:%M:%S")
+                vreme_poslednjeg_bekapa = rezultat[0][1].strftime("%d.%m.%Y, %H:%M:%S")
                 self.datum_poslednjeg_bekapa.set(vreme_poslednjeg_bekapa)
         except ValueError:
             messagebox.showinfo("Hmmmmm", "Nešto nije u redu sa bazom podataka!", parent=self.prozor_sistem)
@@ -194,23 +199,32 @@ class Sistem:
                 self.valuta_entry.insert(0, rezultat[0][7])
             if rezultat[0][1]:
                 self.racunovodja_entry.insert(0, rezultat[0][1])
+            if rezultat[0][8]:
+                self.pib_entry.insert(0, rezultat[0][8])
+            if rezultat[0][9]:
+                self.mesto_entry.insert(0, rezultat[0][9])
+            if rezultat[0][10]:
+                self.ulica_entry.insert(0, rezultat[0][10])
 
     def ocitaj_podatke(self):
-        naziv = self.naziv_organizacije_entry.get()
+        naziv = self.convert_u_latinicu(self.naziv_organizacije_entry.get())
+        pib = self.pib_entry.get()
+        mesto = self.convert_u_latinicu(self.mesto_entry.get())
+        adresa = self.convert_u_latinicu(self.ulica_entry.get())
         jbjks = self.jbkjs_entry.get()
         program = self.program_entry.get()
         projekat = self.projekat_entry.get()
         funkcionalna = self.funkcionalna_entry.get()
         valuta = self.valuta_entry.get()
-        racunovodja = self.racunovodja_entry.get()
+        racunovodja = self.convert_u_latinicu(self.racunovodja_entry.get())
 
-        return racunovodja, naziv, jbjks, program, projekat, funkcionalna, valuta
+        return racunovodja, naziv, jbjks, program, projekat, funkcionalna, valuta, pib, mesto, adresa
 
     def dodaj_organizaciju(self):
         ocitani_podaci = self.ocitaj_podatke()
         try:
             organizacija_kontroler = KorisnikController()
-            organizacija_kontroler.unesi_podatke(ocitani_podaci[0], ocitani_podaci[1], ocitani_podaci[2], ocitani_podaci[3], ocitani_podaci[4], ocitani_podaci[5], ocitani_podaci[6])
+            organizacija_kontroler.unesi_podatke(ocitani_podaci[0], ocitani_podaci[1], ocitani_podaci[2], ocitani_podaci[3], ocitani_podaci[4], ocitani_podaci[5], ocitani_podaci[6], ocitani_podaci[7], ocitani_podaci[8], ocitani_podaci[9])
             # ponovo učitati prozor sa podacima
             self.prozor_podaci_organizacija.destroy()
             self.organizacija_prozor()
@@ -222,7 +236,7 @@ class Sistem:
         ocitani_podaci = self.ocitaj_podatke()
         try:
             organizacija_kontroler = KorisnikController()
-            organizacija_kontroler.izmeni_podatke(ocitani_podaci[0], ocitani_podaci[1], ocitani_podaci[2], ocitani_podaci[3], ocitani_podaci[4], ocitani_podaci[5], ocitani_podaci[6])
+            organizacija_kontroler.izmeni_podatke(ocitani_podaci[0], ocitani_podaci[1], ocitani_podaci[2], ocitani_podaci[3], ocitani_podaci[4], ocitani_podaci[5], ocitani_podaci[6], ocitani_podaci[7], ocitani_podaci[8], ocitani_podaci[9])
             # ponovo učitati prozor sa podacima
             self.prozor_podaci_organizacija.destroy()
             self.organizacija_prozor()
@@ -252,49 +266,69 @@ class Sistem:
         self.entry_polja_organizacija.rowconfigure(4, weight=1)
         self.entry_polja_organizacija.rowconfigure(5, weight=1)
         self.entry_polja_organizacija.rowconfigure(6, weight=1)
+        self.entry_polja_organizacija.rowconfigure(7, weight=1)
+        self.entry_polja_organizacija.rowconfigure(8, weight=1)
 
         # Label i polje za unos naziva organizacije
         self.naziv_organizacije_label = Label(self.entry_polja_organizacija, text="Naziv organizacije:")
-        self.naziv_organizacije_label.grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        self.naziv_organizacije_label.grid(row=0, column=0, padx=10, sticky='w')
         self.naziv_organizacije_entry = Entry(self.entry_polja_organizacija)
-        self.naziv_organizacije_entry.grid(row=0, column=1, padx=10, pady=10, sticky='ew')
+        self.naziv_organizacije_entry.grid(row=0, column=1, padx=10, sticky='ew')
         # self.naziv_entry_nalog.bind("<KeyRelease>", self.__proveri_jezik)
+
+        # Label i polje za unos PIB
+        self.pib_label = Label(self.entry_polja_organizacija, text="PIB:")
+        self.pib_label.grid(row=1, column=0, padx=10, sticky='w')
+        self.pib_entry = Entry(self.entry_polja_organizacija)
+        self.pib_entry.grid(row=1, column=1, padx=10, sticky='ew')
+
+        # Label i polje za unos mesta organizacije
+        self.mesto_label = Label(self.entry_polja_organizacija, text="Mesto:")
+        self.mesto_label.grid(row=2, column=0, padx=10, sticky='w')
+        self.mesto_entry = Entry(self.entry_polja_organizacija)
+        self.mesto_entry.grid(row=2, column=1, padx=10, sticky='ew')
+
+        # Label i polje za unos adrese organizacije
+        self.ulica_label = Label(self.entry_polja_organizacija, text="Ulica i broj:")
+        self.ulica_label.grid(row=3, column=0, padx=10, sticky='w')
+        self.ulica_entry = Entry(self.entry_polja_organizacija)
+        self.ulica_entry.grid(row=3, column=1, padx=10, sticky='ew')
 
         # Label i polje za unos JBKJS
         self.jbkjs_label = Label(self.entry_polja_organizacija, text="JBKJS:")
-        self.jbkjs_label.grid(row=1, column=0, padx=10, sticky='w')
+        self.jbkjs_label.grid(row=4, column=0, padx=10, sticky='w')
         self.jbkjs_entry = Entry(self.entry_polja_organizacija)
-        self.jbkjs_entry.grid(row=1, column=1, padx=10, sticky='ew')
+        self.jbkjs_entry.grid(row=4, column=1, padx=10, sticky='ew')
 
         # Label i polje za sifre programa
         self.program_label = Label(self.entry_polja_organizacija, text="Šifra programa:")
-        self.program_label.grid(row=2, column=0, padx=10, sticky='w')
+        self.program_label.grid(row=4, column=0, padx=10, sticky='w')
         self.program_entry = Entry(self.entry_polja_organizacija)
-        self.program_entry.grid(row=2, column=1, padx=10, sticky='ew')
+        self.program_entry.grid(row=4, column=1, padx=10, sticky='ew')
 
         # Label i polje za sifre projekta
         self.projekat_label = Label(self.entry_polja_organizacija, text="Šifra projekta:")
-        self.projekat_label.grid(row=3, column=0, padx=10, sticky='w')
+        self.projekat_label.grid(row=5, column=0, padx=10, sticky='w')
         self.projekat_entry = Entry(self.entry_polja_organizacija)
-        self.projekat_entry.grid(row=3, column=1, padx=10, sticky='ew')
+        self.projekat_entry.grid(row=5, column=1, padx=10, sticky='ew')
 
         # Label i polje za sifre funkcionalne klasifikacije
         self.funkcionalna_label = Label(self.entry_polja_organizacija, text="Funkcionalna klasifikacija:")
-        self.funkcionalna_label.grid(row=4, column=0, padx=10, sticky='w')
+        self.funkcionalna_label.grid(row=6, column=0, padx=10, sticky='w')
         self.funkcionalna_entry = Entry(self.entry_polja_organizacija)
-        self.funkcionalna_entry.grid(row=4, column=1, padx=10, sticky='ew')
+        self.funkcionalna_entry.grid(row=6, column=1, padx=10, sticky='ew')
 
         # Label i polje za sifre valute
         self.valuta_label = Label(self.entry_polja_organizacija, text="Šifra valute:")
-        self.valuta_label.grid(row=5, column=0, padx=10, sticky='w')
+        self.valuta_label.grid(row=7, column=0, padx=10, sticky='w')
         self.valuta_entry = Entry(self.entry_polja_organizacija)
-        self.valuta_entry.grid(row=5, column=1, padx=10, sticky='ew')
+        self.valuta_entry.grid(row=7, column=1, padx=10, sticky='ew')
 
         # Label i polje za ime i prezime knjigovodje
         self.racunovodja_label = Label(self.entry_polja_organizacija, text="Računovodja (ime i prezime):")
-        self.racunovodja_label.grid(row=6, column=0, padx=10, sticky='w')
+        self.racunovodja_label.grid(row=8, column=0, padx=10, sticky='w')
         self.racunovodja_entry = Entry(self.entry_polja_organizacija)
-        self.racunovodja_entry.grid(row=6, column=1, padx=10, sticky='ew')
+        self.racunovodja_entry.grid(row=8, column=1, padx=10, sticky='ew')
 
         # Drugi frame za dugmad Dodaj, Izmeni, Obrisi i Izaberi
         self.polje_dugmad_organizacija = LabelFrame(self.prozor_podaci_organizacija, text="Komande", bg="lightblue")
@@ -345,6 +379,12 @@ class Sistem:
         self.polje_dugmad_organizacija = None
         self.dugme_dodaj_organizaciju = None
         self.dugme_izmeni_organizaciju = None
+        self.pib_label = None
+        self.pib_entry = None
+        self.mesto_label = None
+        self.mesto_entry = None
+        self.ulica_label = None
+        self.ulica_entry = None
 
         self.notebook = ttk.Notebook(self.prozor_sistem)
         self.notebook.grid(row=0, column=0, padx=10, pady=10, sticky='nsew')

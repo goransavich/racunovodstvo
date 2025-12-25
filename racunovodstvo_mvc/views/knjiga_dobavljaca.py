@@ -13,7 +13,8 @@ import os
 class KnjigaDobavljaca:
 
     # Ova funkcija kovertuje rezultat iz baze tako sto vrednosti None kovertuje u nulu
-    def __konvertuj_none_nula(self, niz):
+    @staticmethod
+    def __konvertuj_none_nula(niz):
         rezultat = []
         for record in niz:
             konvertovano = [0 if v is None else v for v in record]
@@ -76,7 +77,8 @@ class KnjigaDobavljaca:
                                                    tags=('oddrow',))
                 count_stavke_naloga += 1
 
-    def __izvuci_pomocnu_knjigu_dobavljaca(self, pocetni_datum, krajnji_datum):
+    @staticmethod
+    def __izvuci_pomocnu_knjigu_dobavljaca(pocetni_datum, krajnji_datum):
         # godina = pocetni_datum.year
         # rezultat = []
         konto_conn = KontoController()
@@ -98,7 +100,8 @@ class KnjigaDobavljaca:
             podaci = self.__izvuci_pomocnu_knjigu_dobavljaca(pocetni, krajnji)
             self.__prikaz_podataka_u_tabeli(podaci)
 
-    def pravljenje_excel_izvestaja(self, podaci, pocetni, krajnji):
+    @staticmethod
+    def pravljenje_excel_izvestaja(podaci, pocetni, krajnji):
         # Create a workbook and add a worksheet.
         workbook = xlsxwriter.Workbook('pomocna_knjiga_dobavljaca_excel.xlsx')
         worksheet = workbook.add_worksheet()
@@ -182,8 +185,9 @@ class KnjigaDobavljaca:
             krajnji = self.datum_do.get_date()
             rezultat = self.__izvuci_pomocnu_knjigu_dobavljaca(pocetni, krajnji)
             konvertovan_rezultat = self.__konvertuj_none_nula(rezultat)
-            print(konvertovan_rezultat)
+            vrsta = "dobavljac"
             stampa = StampaIzvestaja()
+            stampa.stampa_ios(konvertovan_rezultat, vrsta, krajnji)
             # Eksportovati IOS u PDF
             # self.pravljenje_excel_izvestaja(konvertovan_rezultat, pocetni, krajnji)
         except:

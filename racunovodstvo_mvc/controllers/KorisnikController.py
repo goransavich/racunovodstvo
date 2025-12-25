@@ -27,23 +27,23 @@ class KorisnikController:
         except Error as e:
             Greske("Greska prilikom trazenja organizacije po sifri - KorisnikController", e)
 
-    def izmeni_podatke(self, ime, naziv, jbkjs, program, projekat, funkcionalna, valuta):
+    def izmeni_podatke(self, ime, naziv, jbkjs, program, projekat, funkcionalna, valuta, pib, mesto, adresa):
         # Ažuriranje baze podataka
         try:
             set_condition = 'ime="{}"'.format(ime) + ', kompanija="{}"'.format(naziv) + ', jbkjs="{}"'.format(
                 jbkjs) + ', program="{}"'.format(program) + ', projekat="{}"'.format(projekat) + ', funkcionalna="{}"'.format(
-                funkcionalna) + ', valuta="{}"'.format(valuta)
+                funkcionalna) + ', valuta="{}"'.format(valuta) + ', pib="{}"'.format(pib) + ', mesto="{}"'.format(mesto) + ', adresa="{}"'.format(adresa)
             filter_condition = 'idkorisnik=1'
             connection = Database()
             connection.update(self.tablename, set_condition, filter_condition)
         except Error as e:
             Greske("Greska prilikom azuriranje podataka o organizaciji - KorisnikController.izmeni_podatke", e)
 
-    def unesi_podatke(self, ime, naziv, jbkjs, program, projekat, funkcionalna, valuta):
+    def unesi_podatke(self, ime, naziv, jbkjs, program, projekat, funkcionalna, valuta, pib, mesto, adresa):
         # Ažuriranje baze podataka
         try:
-            schema = "ime, kompanija, jbkjs, program, projekat, funkcionalna, valuta"
-            value = (ime, naziv, jbkjs, program, projekat, funkcionalna, valuta)
+            schema = "ime, kompanija, jbkjs, program, projekat, funkcionalna, valuta, pib, mesto, adresa"
+            value = (ime, naziv, jbkjs, program, projekat, funkcionalna, valuta, pib, mesto, adresa)
             connection = Database()
             connection.insert(self.tablename, schema, value)
         except Error as e:

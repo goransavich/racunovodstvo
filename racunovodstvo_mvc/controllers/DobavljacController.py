@@ -36,6 +36,16 @@ class DobavljacController:
         except Error as e:
             Greske("Greska pronadji dobavljaca svi podaci - DobavljaciController", e)
 
+    def pronadji_dobavljaca_po_id_konta(self, kontoid):
+        try:
+            condition = 'id_konta'
+            select_columns = "*"
+            connection = Database()
+            pronadjen = connection.select_where(self.tablename, select_columns, condition, kontoid)
+            return pronadjen
+        except Error as e:
+            Greske("Greska pronadji dobavljaca svi podaci - DobavljaciController", e)
+
     def unos_dobavljaca_u_tabelu(self, pib, naziv, idkonta, mesto, adresa):
         try:
             schema = "naziv, pib, id_konta, mesto, adresa"

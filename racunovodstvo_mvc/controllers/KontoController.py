@@ -191,7 +191,7 @@ class KontoController:
                                                               where_condition, order_by)
             return sve_konto
         except Error as e:
-            Greske("Dobijanje stanje konta po subsubanalitici - KontoController", e)
+            Greske("Dobijanje knjige dobavljaca - KontoController.knjiga_dobavljaca_spisak", e)
 
     # Dobijanje pomocne knjige placenih avansa
     def knjiga_placeni_avansi(self, datum_pocetni, datum_krajnji):

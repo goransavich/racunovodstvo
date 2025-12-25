@@ -1,7 +1,8 @@
 from fpdf import FPDF
 from racunovodstvo_mvc.controllers.AplikacijaController import AplikacijaController
 from racunovodstvo_mvc.controllers.KorisnikController import KorisnikController
-from datetime import date
+from racunovodstvo_mvc.controllers.DobavljacController import DobavljacController
+from datetime import date, datetime
 import webbrowser
 import locale
 import xlsxwriter
@@ -68,9 +69,47 @@ class PDF(FPDF):
         # Page number
         self.cell(0, 27, 'Strana ' + str(self.page_no()) + '/{nb}', 0, 0, 'R')
 
+class PDF1(FPDF):
+
+    def __init__(self, orient, mera, form):
+        FPDF.__init__(self, orientation=orient, unit=mera, format=form)
+        self.set_font('Helvetica', '', 9)
+        # self.fontsize=fontsize
+
+    def header(self):
+        # Logo
+        # x=110.9, y=16.1
+        # self.image(name='logo.png', x=110.6, y=15.9, w=72.9)
+        '''
+        firma = FirmaModel()
+        podaci_firma = firma.read()
+        stampa = StampaIzvestaja()
+        naziv_firme = stampa.zamena_slova(podaci_firma[0][1])
+        mesto_firme = stampa.zamena_slova(podaci_firma[0][2])
+        '''
+        pass
+
+    # Page footer
+    def footer(self):
+        # Position at 1.5 cm from bottom
+        self.set_y(-15)
+        # Arial italic 8
+        self.set_font('Helvetica', 'I', 9)
+        # Page number
+        # ovde sam iskljucio prikaz koliko ima stranica jer na IOS to nije bitno
+        # self.cell(0, 27, 'Strana ' + str(self.page_no()) + '/{nb}', 0, 0, 'R')
+
 
 class StampaIzvestaja:
 
+    # Ova funkcija kovertuje rezultat iz baze tako sto vrednosti None kovertuje u nulu
+    def __konvertuj_none_prazno(self, niz):
+        rezultat = []
+        for record in niz:
+            konvertovano = ["" if v is None else v for v in record]
+            rezultat.append(konvertovano)
+
+        return rezultat
     def zamena_slova(self, rec):
         if rec is not None:
             return rec.replace('č', 'c').replace('ž', 'z').replace('ć', 'c').replace('š', 's').replace('Č', 'C').replace('Ž', 'Z').replace('Ć', 'C').replace('Š', 'S').replace('đ', 'dj').replace('Đ', 'Dj')
@@ -1051,24 +1090,108 @@ class StampaIzvestaja:
 
         webbrowser.open_new(r'efaktura.pdf')
 
-    def stampa_ios_dobavljaci(self, rezultat_stavke, oznaka_konta_izvestaj):
+    def stampa_ios(self, rezultat_stavke, vrsta, datum_sravnjenja):
         locale.setlocale(locale.LC_ALL, 'de_DE')
-        pdf = PDF('portrait', 'cm', 'A4')
+        pdf = PDF1('portrait', 'cm', 'A4')
         pdf.alias_nb_pages()
         # pdf.accept_page_break()
         pdf.add_page()
-        ukupno_duguje = 0
-        ukupno_potrazuje = 0
+        dobavljac = DobavljacController()
+        organizacija = KorisnikController()
+        podaci_organizacija = organizacija.read()
+        danasnji_datum = datetime.now()
+        print(podaci_organizacija)
         for record in rezultat_stavke:
+            # pronaci podatke o dobavljacu na osnovu id konta iz record-a
+            podaci_dobavljac = dobavljac.pronadji_dobavljaca_po_id_konta(record[5])
+            konvertovan_dobavljac = self.__konvertuj_none_prazno(podaci_dobavljac)
+
             ukupno_duguje = record[1] + record[3]
             ukupno_potrazuje = record[2] + record[4]
-            # Racunanje salda naloga duguje/potrazuje
+            ukupan_saldo = ukupno_duguje - ukupno_potrazuje
 
+            # Racunanje salda naloga duguje/potrazuje
+            if ukupan_saldo > 0:
+                saldo = ukupan_saldo
+                tekst = " u nasu korist."
+            elif ukupan_saldo < 0:
+                saldo = ukupno_potrazuje - ukupno_duguje
+                tekst = " u vasu korist."
+            else:
+                saldo = 0
+                tekst = ""
+
+            saldo_formatiran = locale.format_string('%10.2f', saldo, grouping=True)
+
+            adresa = self.zamena_slova(konvertovan_dobavljac[0][5]) + ", " + self.zamena_slova(konvertovan_dobavljac[0][4])
+            if adresa == ", ":
+                adresa_stampa = ""
+            else:
+                adresa_stampa = adresa
+
+            # formiranje izvestaja
+            pdf.set_font('Helvetica', 'B', 11)
+            pdf.cell(2, 0.5, "Naziv", 0, 0, 'L')
+            pdf.cell(17, 0.5, self.zamena_slova(podaci_organizacija[0][2]), 0, 1, 'L')
+            pdf.cell(2, 0.5, "Adresa", 0, 0, 'L')
+            pdf.cell(17, 0.5, self.zamena_slova(podaci_organizacija[0][10]) + ", " + self.zamena_slova(podaci_organizacija[0][9]), 0, 1, 'L')
+            pdf.cell(2, 0.5, "PIB", 0, 0, 'L')
+            pdf.cell(17, 0.5, podaci_organizacija[0][8], 0, 1, 'L')
+            pdf.cell(19, 1, "", 0, 1, 'L')
+            pdf.set_font('Helvetica', '', 16)
+            pdf.cell(19, 2, "IZVOD OTVORENIH STAVKI", 0, 1, 'C')
+            pdf.cell(19, 1, "", 0, 1, 'L')
+            pdf.set_font('Helvetica', 'B', 11)
+            pdf.cell(19, 0.5, "Poslovni partner", 0, 1, 'L')
+
+            pdf.set_font('Helvetica', '', 11)
+            pdf.cell(2, 0.5, "Naziv", 0, 0, 'L')
+            pdf.cell(17, 0.5, self.zamena_slova(konvertovan_dobavljac[0][1]), 0, 1, 'L')
+
+            pdf.cell(2, 0.5, "Adresa", 0, 0, 'L')
+            pdf.cell(17, 0.5, adresa_stampa, 0, 1, 'L')
+            pdf.cell(2, 0.5, "PIB", 0, 0, 'L')
+            pdf.cell(17, 0.5, konvertovan_dobavljac[0][2], 0, 1, 'L')
+            pdf.cell(19, 1, "", 0, 1, 'L')
+
+            if vrsta == "dobavljac":
+                vrsta_ios = ""
+            else:
+                vrsta_ios = "datih avansa"
+
+            datum_ios = datum_sravnjenja.strftime("%d.%m.%Y.")
+            pdf.cell(19, 0.5, "Uvidom u nasu evidenciju konstatovali smo da je stanje otvorenih stavki" + vrsta_ios + " na dan " + datum_ios + " godine:", 0, 1, 'L')
+            if vrsta == "dobavljac":
+                pdf.set_font('Helvetica', 'B', 11)
+                pdf.cell(19, 0.5, "RSD " + saldo_formatiran + tekst, 0, 1, 'L')
+            else:
+                pdf.set_font('Helvetica', 'B', 11)
+                pdf.cell(19, 0.5, "RSD " + saldo_formatiran, 0, 1, 'L')
+
+            pdf.set_font('Helvetica', '', 11)
+            pdf.cell(19, 1, "", 0, 1, 'L')
+            pdf.cell(19, 0.5, "1. Potvrdjujemo stanje otvorenih stavki.", 0, 1, 'L')
+            pdf.cell(19, 0.5, "2. Osporavamo iskazano stanje u celini/delimicno za iznos od _________________ dinara iz sledecih", 0, 1, 'L')
+            pdf.cell(19, 0.5, "razloga _________________________________________________________________________________", 0, 1, 'L')
+            pdf.cell(19, 1, "", 0, 1, 'L')
+            pdf.cell(19, 0.5, "Ukoliko ne overite i ne vratite obrazac u roku od 8 dana po prijemu, smatracemo da ste saglasni sa", 0, 1, 'L')
+            pdf.cell(19, 0.5, "iskazanim stanjem", 0, 1, 'L')
+            pdf.cell(19, 1, "", 0, 1, 'L')
+            pdf.cell(10, 0.5, "Posiljalac izvoda", 0, 0, 'L')
+            pdf.cell(8, 0.5, "Kontakt osoba", 0, 1, 'R')
+            pdf.cell(9, 0.5, self.zamena_slova(podaci_organizacija[0][1]), 0, 0, 'L')
+            pdf.cell(10, 0.5, "_________________", 0, 1, 'R')
+            pdf.cell(9, 0.5, self.zamena_slova(podaci_organizacija[0][9]) + ", " + danasnji_datum.strftime("%d.%m.%Y."), 0, 0, 'L')
+            pdf.cell(10, 0.5, "_________________", 0, 1, 'R')
+            pdf.cell(10, 0.5, "", 0, 0, 'L')
+            pdf.cell(8, 0.5, "Mesto i datum", 0, 1, 'R')
+
+            pdf.add_page()
 
         '''
         duguje_prikaz = locale.format_string('%10.2f', duguje, grouping=True)
         potrazuje_prikaz = locale.format_string('%10.2f', potrazuje, grouping=True)
-
+        
         saldo = duguje - potrazuje
         
         saldo_ukupno = saldo
@@ -1119,12 +1242,12 @@ class StampaIzvestaja:
         pdf.cell(4, 1, duguje_prikaz, 0, 0, 'R', fill=True)
         pdf.cell(4, 1, potrazuje_prikaz, 0, 1, 'R', fill=True)
         pdf.ln(2)
-
-        # pdf.cell(5, 1, kontirao, 0, 1, 'C')
-        pdf.output('kartica.pdf', 'F')
-
-        webbrowser.open_new(r'kartica.pdf')
         '''
+        # pdf.cell(5, 1, kontirao, 0, 1, 'C')
+        pdf.output('ios.pdf', 'F')
+
+        webbrowser.open_new(r'ios.pdf')
+
 
 
 

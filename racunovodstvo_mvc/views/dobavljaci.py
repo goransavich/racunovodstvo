@@ -1,4 +1,4 @@
-from tkinter import ttk, Label, Frame, Button, LabelFrame, Entry, Canvas, Toplevel,messagebox
+from tkinter import ttk, Label, Frame, Button, LabelFrame, Entry, Canvas, Toplevel, messagebox
 from racunovodstvo_mvc.controllers.DobavljacController import DobavljacController
 from racunovodstvo_mvc.controllers.KeyboardController import KeyboardController
 from racunovodstvo_mvc.controllers.KontoController import KontoController
