@@ -105,6 +105,7 @@ class KnjigaDobavljaca:
         # Create a workbook and add a worksheet.
         workbook = xlsxwriter.Workbook('pomocna_knjiga_dobavljaca_excel.xlsx')
         worksheet = workbook.add_worksheet()
+
         # Add a bold format to use to highlight cells.
         zaglavlje_naslov = workbook.add_format({'valign': 'center', 'bold': True})
         zaglavlje = workbook.add_format({'valign': 'center', 'bold': True, 'bg_color': '#99c7f7'})
@@ -136,7 +137,7 @@ class KnjigaDobavljaca:
         col = 0
 
         # Iterate over the data and write it out row by row.
-        for naziv, pocetno_duguje, pocetno_potrazuje, tekuce_duguje, tekuce_potrazuje in podaci:
+        for naziv, pocetno_duguje, pocetno_potrazuje, tekuce_duguje, tekuce_potrazuje, id_dobavljaca in podaci:
             ukupno_duguje = pocetno_duguje+tekuce_duguje
             ukupno_potrazuje = pocetno_potrazuje+tekuce_potrazuje
             ukupan_saldo = ukupno_duguje-ukupno_potrazuje
@@ -173,7 +174,6 @@ class KnjigaDobavljaca:
             krajnji = self.datum_do.get_date()
             rezultat = self.__izvuci_pomocnu_knjigu_dobavljaca(pocetni, krajnji)
             konvertovan_rezultat = self.__konvertuj_none_nula(rezultat)
-
             # Eksportovati novi_niz u excel
             self.pravljenje_excel_izvestaja(konvertovan_rezultat, pocetni, krajnji)
         except:

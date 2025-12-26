@@ -47,4 +47,6 @@ VERZIJE:
 1.8  - 23.12.2024. Dodato je kada se uradi bekap podataka da se otvori prozor sa fajlovima gde se nalazi bekap.
 1.9  - 23.09.2025. Dodata je mogucnost kreiranja JSON fajla za ORIS.
 1.10 - 27.11.2025. Dodata je mogucnost kreiranja JSON fajla za Izvestaj o izvrsenju budzeta i JSON fajla za Zavrsni racun. Izbaceno je dugme za obican izvestaj o izvrsenju budzeta
+1.11 - 26.12.2025. Dodato je automatsko formiranje IOS za dobavljace (pdf) i IOS za avanse (word). Zbog ovoga su u tabeli Dobavljaci dodata dva polja: mesto i adresa i 
+                   u tabeli Korisnik, tri polja: PIB, mesto i adresa
 
