@@ -208,6 +208,16 @@ class Database:
       self.con.close()
       return rezultat
 
+   def select_distinct_avansi(self, select_columns, iz_tabele,  join1, join2, where_condition, order_by, nivo=None):
+      query_select = "SELECT DISTINCT substring(konto.oznaka, 8) as proba, {0} FROM {1} join {2} join {3} WHERE {4} GROUP BY proba ORDER BY proba".format(
+            select_columns, iz_tabele, join1, join2, where_condition, nivo, order_by)
+      cursor = self.con.cursor()
+      cursor.execute(query_select)
+      rezultat = cursor.fetchall()
+      cursor.close()
+      self.con.close()
+      return rezultat
+
    def select_where_join(self, select_columns, iz_tabele,  join1, join2, where_condition, order_by):
       query_select = "SELECT {0} FROM {1} join {2} join {3} WHERE {4} ORDER BY {5}".format(select_columns, iz_tabele,  join1, join2, where_condition, order_by)
       cursor = self.con.cursor()

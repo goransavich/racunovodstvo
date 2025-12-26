@@ -1,8 +1,0 @@
-mysql-connector-python
-fpdf
-tkcalendar
-pandas
-openpyxl
-xlsxwriter
-cyrtranslit
-PyPDF2

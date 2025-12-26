@@ -204,7 +204,7 @@ class KontoController:
                 datum_pocetni) + " and '{}'".format(datum_krajnji)
             order_by = "konto.oznaka"
             connection = Database()
-            sve_konto = connection.select_distinct_dobavljaci(select_columns, iz_tabele, join1, join2,
+            sve_konto = connection.select_distinct_avansi(select_columns, iz_tabele, join1, join2,
                                                               where_condition, order_by)
             return sve_konto
         except Error as e:

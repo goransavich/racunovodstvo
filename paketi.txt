@@ -17,6 +17,7 @@ PAKETI ZA PROGRAM RAČUNOVODSTVO:
 - pip                     23.2.1
 - python-dateutil         2.9.0.post0
 - urllib                  2.4.0
+- python-docx             1.2.0
 
 
 Kada se pravi exe:
