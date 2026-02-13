@@ -49,4 +49,5 @@ VERZIJE:
 1.10 - 27.11.2025. Dodata je mogucnost kreiranja JSON fajla za Izvestaj o izvrsenju budzeta i JSON fajla za Zavrsni racun. Izbaceno je dugme za obican izvestaj o izvrsenju budzeta
 1.11 - 26.12.2025. Dodato je automatsko formiranje IOS za dobavljace (pdf) i IOS za avanse (word). Zbog ovoga su u tabeli Dobavljaci dodata dva polja: mesto i adresa i 
                    u tabeli Korisnik, tri polja: PIB, mesto i adresa
+1.12 - 12.02.2026. Zbog zakonskih izmena obrazaca za zavrsni racun i izvestaj o izvrsenju budzeta, uradjena je izmena programa kod kreiranja JSON fajla
 

@@ -109,11 +109,11 @@ class ZavrsniRacunElektronski:
     @staticmethod
     def determine_type(key):
         if int(key) in range(1001, 1074):
-            return 0
+            return 21                                   # bilo 0 do 01.02.2026.
         elif int(key) in range(1074, 1241):
-            return 1
+            return 22                                   # bilo 1 do 01.02.2026.
         elif int(key) in range(5001, 5435):
-            return 5
+            return 25                                   # bilo 5 do 01.02.2026.
         else:
             return 99  # fallback
 
@@ -133,7 +133,7 @@ class ZavrsniRacunElektronski:
         for t, fields in grouped.items():
             form = {"Header": {"Type": t}}
             if t == 0:
-                form["Header"]["Kind"] = 1
+                form["Header"]["Kind"] = 2    # bilo 1 do 01.02.2026.
             form.update(fields)
             forms.append(form)
 

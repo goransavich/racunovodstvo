@@ -51,7 +51,7 @@ class IzvrsenjeBudzetaElektronski:
             "Forms": [
                 {
                     "Header": {
-                        "Type": 5,
+                        "Type": 25,
                         "Kind": 1
                     }
                 }
