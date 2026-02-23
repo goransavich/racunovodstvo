@@ -1247,6 +1247,7 @@ class Nalozi:
                 xsifra_projekta = sifre[0][5]
                 xsifra_funkcionalne = sifre[0][6]
                 xsifra_valute = int(sifre[0][7])
+                xsifra_trezora = sifre[0][11]
                 stavke_naloga_controller = StavkaNalogaController()
                 # PRONADJI SVE NALOGE IZ TEKUCE GODINE KOJI SU PROKNJIZENI I NEMAJU ORIS_ID
                 podaci_json = []
@@ -1265,8 +1266,24 @@ class Nalozi:
                         else:
                             iznos_duguje = ""
                             iznos_potrazuje = Decimal((stavka[4]))
-                        podaci_stavke_naloga = {"IdentFajla": broj_orisa, "IdNalogaKorisika": nalog[3], "XSifraTrezora": "", "XJBKJS": xjbkjs, "XSifraPrograma": xsifra_programa, "XSifraProjekta": xsifra_projekta, "XSifraIzvoraFinansiranja": "01", "XSifraFunkcKlasifikacije": xsifra_funkcionalne, "XSifraEkonomskeKlasifikacije": konto, "XSifraPodekonomskeKlasifikacije": "", "XIznosDuguje": iznos_duguje, "XIznosPotrazuje": iznos_potrazuje, "XIznosDugujeStranaValuta": "", "XIznosPotrazujeStranaValuta": "", "XSifraValute": xsifra_valute, "XDatumKnjizenja": nalog[1].strftime('%Y-%m-%d'), "XDatumKreiranja": nalog[2].strftime('%Y-%m-%d')}
-                        podaci_json.append(podaci_stavke_naloga)
+
+                        skup = {0, 1, 2, 3, 7, 8, 9} # ovaj deo je ubacen naknadno zbog pravila ORIS da rashodne aproprijacije moraju da imaju program, projekat, funkciju i izvor
+                        if int(konto[0]) in skup:
+                            podaci_stavke_naloga = {"IdentFajla": broj_orisa, "IdNalogaKorisika": nalog[3], "XSifraTrezora": xsifra_trezora, "XJBKJS": xjbkjs, "XSifraPrograma": "", "XSifraProjekta": "", "XSifraIzvoraFinansiranja": "", "XSifraFunkcKlasifikacije": "", "XSifraEkonomskeKlasifikacije": konto, "XSifraPodekonomskeKlasifikacije": "", "XIznosDuguje": iznos_duguje, "XIznosPotrazuje": iznos_potrazuje, "XIznosDugujeStranaValuta": "", "XIznosPotrazujeStranaValuta": "", "XSifraValute": xsifra_valute, "XDatumKnjizenja": nalog[1].strftime('%Y-%m-%d'), "XDatumKreiranja": nalog[2].strftime('%Y-%m-%d')}
+                            podaci_json.append(podaci_stavke_naloga)
+                        else:
+                            podaci_stavke_naloga = {"IdentFajla": broj_orisa, "IdNalogaKorisika": nalog[3],
+                                                    "XSifraTrezora": xsifra_trezora, "XJBKJS": xjbkjs,
+                                                    "XSifraPrograma": xsifra_programa,
+                                                    "XSifraProjekta": xsifra_projekta, "XSifraIzvoraFinansiranja": "01",
+                                                    "XSifraFunkcKlasifikacije": xsifra_funkcionalne,
+                                                    "XSifraEkonomskeKlasifikacije": konto,
+                                                    "XSifraPodekonomskeKlasifikacije": "", "XIznosDuguje": iznos_duguje,
+                                                    "XIznosPotrazuje": iznos_potrazuje, "XIznosDugujeStranaValuta": "",
+                                                    "XIznosPotrazujeStranaValuta": "", "XSifraValute": xsifra_valute,
+                                                    "XDatumKnjizenja": nalog[1].strftime('%Y-%m-%d'),
+                                                    "XDatumKreiranja": nalog[2].strftime('%Y-%m-%d')}
+                            podaci_json.append(podaci_stavke_naloga)
 
                 # na osnovu ovoga formirati JSON fajl
                 self.napravi_json_fajl(podaci_json, broj_orisa)

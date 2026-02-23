@@ -50,4 +50,5 @@ VERZIJE:
 1.11 - 26.12.2025. Dodato je automatsko formiranje IOS za dobavljace (pdf) i IOS za avanse (word). Zbog ovoga su u tabeli Dobavljaci dodata dva polja: mesto i adresa i 
                    u tabeli Korisnik, tri polja: PIB, mesto i adresa
 1.12 - 12.02.2026. Zbog zakonskih izmena obrazaca za zavrsni racun i izvestaj o izvrsenju budzeta, uradjena je izmena programa kod kreiranja JSON fajla
+1.13 - 19.02.2026. Izmenjena su pravila za formiranje ORIS fajla: za klase 0,1,2,3,7,8,9 ne unose se program, projekat, funkcija i izvor
 

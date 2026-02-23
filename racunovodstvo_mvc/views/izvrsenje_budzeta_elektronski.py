@@ -52,7 +52,7 @@ class IzvrsenjeBudzetaElektronski:
                 {
                     "Header": {
                         "Type": 25,
-                        "Kind": 1
+                        "Kind": 2
                     }
                 }
             ]

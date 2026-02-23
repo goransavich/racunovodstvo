@@ -205,6 +205,22 @@ class Sistem:
                 self.mesto_entry.insert(0, rezultat[0][9])
             if rezultat[0][10]:
                 self.ulica_entry.insert(0, rezultat[0][10])
+            if rezultat[0][11]:
+                self.trezor_entry.insert(0, rezultat[0][11])
+
+    def obrisi_polja(self):
+
+        self.naziv_organizacije_entry.delete(0, "end")
+        self.jbkjs_entry.delete(0, "end")
+        self.program_entry.delete(0, "end")
+        self.projekat_entry.delete(0, "end")
+        self.funkcionalna_entry.delete(0, "end")
+        self.valuta_entry.delete(0, "end")
+        self.racunovodja_entry.delete(0, "end")
+        self.pib_entry.delete(0, "end")
+        self.mesto_entry.delete(0, "end")
+        self.ulica_entry.delete(0, "end")
+        self.trezor_entry.delete(0, "end")
 
     def ocitaj_podatke(self):
         naziv = self.convert_u_latinicu(self.naziv_organizacije_entry.get())
@@ -216,15 +232,16 @@ class Sistem:
         projekat = self.projekat_entry.get()
         funkcionalna = self.funkcionalna_entry.get()
         valuta = self.valuta_entry.get()
+        trezor = self.trezor_entry.get()
         racunovodja = self.convert_u_latinicu(self.racunovodja_entry.get())
 
-        return racunovodja, naziv, jbjks, program, projekat, funkcionalna, valuta, pib, mesto, adresa
+        return racunovodja, naziv, jbjks, program, projekat, funkcionalna, valuta, pib, mesto, adresa, trezor
 
     def dodaj_organizaciju(self):
         ocitani_podaci = self.ocitaj_podatke()
         try:
             organizacija_kontroler = KorisnikController()
-            organizacija_kontroler.unesi_podatke(ocitani_podaci[0], ocitani_podaci[1], ocitani_podaci[2], ocitani_podaci[3], ocitani_podaci[4], ocitani_podaci[5], ocitani_podaci[6], ocitani_podaci[7], ocitani_podaci[8], ocitani_podaci[9])
+            organizacija_kontroler.unesi_podatke(ocitani_podaci[0], ocitani_podaci[1], ocitani_podaci[2], ocitani_podaci[3], ocitani_podaci[4], ocitani_podaci[5], ocitani_podaci[6], ocitani_podaci[7], ocitani_podaci[8], ocitani_podaci[9], ocitani_podaci[10])
             # ponovo učitati prozor sa podacima
             self.prozor_podaci_organizacija.destroy()
             self.organizacija_prozor()
@@ -236,10 +253,12 @@ class Sistem:
         ocitani_podaci = self.ocitaj_podatke()
         try:
             organizacija_kontroler = KorisnikController()
-            organizacija_kontroler.izmeni_podatke(ocitani_podaci[0], ocitani_podaci[1], ocitani_podaci[2], ocitani_podaci[3], ocitani_podaci[4], ocitani_podaci[5], ocitani_podaci[6], ocitani_podaci[7], ocitani_podaci[8], ocitani_podaci[9])
+            organizacija_kontroler.izmeni_podatke(ocitani_podaci[0], ocitani_podaci[1], ocitani_podaci[2], ocitani_podaci[3], ocitani_podaci[4], ocitani_podaci[5], ocitani_podaci[6], ocitani_podaci[7], ocitani_podaci[8], ocitani_podaci[9], ocitani_podaci[10])
             # ponovo učitati prozor sa podacima
-            self.prozor_podaci_organizacija.destroy()
-            self.organizacija_prozor()
+            self.obrisi_polja()
+            self.pronadji_podatke_o_organizaciji()
+            #self.prozor_podaci_organizacija.destroy()
+            #self.organizacija_prozor()
             messagebox.showinfo("Uspesno", "Uspešno su izmenjeni podaci!", parent=self.prozor_podaci_organizacija)
         except Error as e:
             messagebox.showwarning("Greška", "Nešto nije u redu sa izmenom podataka!", parent=self.prozor_podaci_organizacija)
@@ -268,6 +287,7 @@ class Sistem:
         self.entry_polja_organizacija.rowconfigure(6, weight=1)
         self.entry_polja_organizacija.rowconfigure(7, weight=1)
         self.entry_polja_organizacija.rowconfigure(8, weight=1)
+        self.entry_polja_organizacija.rowconfigure(9, weight=1)
 
         # Label i polje za unos naziva organizacije
         self.naziv_organizacije_label = Label(self.entry_polja_organizacija, text="Naziv organizacije:")
@@ -324,11 +344,17 @@ class Sistem:
         self.valuta_entry = Entry(self.entry_polja_organizacija)
         self.valuta_entry.grid(row=7, column=1, padx=10, sticky='ew')
 
+        # Label i polje za sifru trezora
+        self.trezor_label = Label(self.entry_polja_organizacija, text="Šifra trezora:")
+        self.trezor_label.grid(row=8, column=0, padx=10, sticky='w')
+        self.trezor_entry = Entry(self.entry_polja_organizacija)
+        self.trezor_entry.grid(row=8, column=1, padx=10, sticky='ew')
+
         # Label i polje za ime i prezime knjigovodje
         self.racunovodja_label = Label(self.entry_polja_organizacija, text="Računovodja (ime i prezime):")
-        self.racunovodja_label.grid(row=8, column=0, padx=10, sticky='w')
+        self.racunovodja_label.grid(row=9, column=0, padx=10, sticky='w')
         self.racunovodja_entry = Entry(self.entry_polja_organizacija)
-        self.racunovodja_entry.grid(row=8, column=1, padx=10, sticky='ew')
+        self.racunovodja_entry.grid(row=9, column=1, padx=10, sticky='ew')
 
         # Drugi frame za dugmad Dodaj, Izmeni, Obrisi i Izaberi
         self.polje_dugmad_organizacija = LabelFrame(self.prozor_podaci_organizacija, text="Komande", bg="lightblue")
