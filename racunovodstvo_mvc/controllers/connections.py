@@ -50,6 +50,18 @@ class Database:
       self.con.close()
       return rezultat
 
+   def select_three_where_oris(self, tablename, select_columns, condition1, value1, condition2, value2, condition3, value3,order=None):
+      if (order==None):
+         query_select = "SELECT {1} from {0} WHERE {2} = '{3}' AND {4} = {5} AND {6} = '{7}'".format(tablename, select_columns, condition1, value1, condition2, value2, condition3, value3)
+      else:
+         query_select = "SELECT {1} from {0} WHERE {2} = {3} AND {4} = {5} AND {6} = '{7}' ORDER by {8}".format(tablename, select_columns, condition1, value1, condition2, value2, condition3, value3, order)
+      cursor = self.con.cursor()
+      cursor.execute(query_select)
+      rezultat = cursor.fetchall()
+      cursor.close()
+      self.con.close()
+      return rezultat
+
    # OVO SE KORISTI NA POCETNOJ STRANI GDE SU IZLISTANI SVI NALOZI - DODATO ZBOG TOGA DA SE VIDI DA LI JE NALOG PREDAT U ORIS
    def select_where_case(self, tablename, select_columns, condition, value, case_uslov, left_join, order=None):
       if (order==None):

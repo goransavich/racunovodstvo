@@ -1,4 +1,2 @@
 
 
-
-Greska prilikom azuriranje podataka o organizaciji - KorisnikController.izmeni_podatke, 1406 (22001): Data too long for column 'trezor' at row 1 ,19.02.2026.

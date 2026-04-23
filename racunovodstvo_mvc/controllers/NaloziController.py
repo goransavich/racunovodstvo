@@ -37,6 +37,23 @@ class NaloziController:
         except Error as e:
             Greske("Pronalazenje u bazi spiska naloga sa podacima BEZ duguje potrazuje, i da li je proknjizen - ovo ide u tabelu na naslovnu stranu za trenutnu radnu godinu- NaloziController ", e)
 
+    # Pronalazenje spiska naloga koji su iz odredjenog meseca i godine i koji su proknjizeni - zbog pravljenja ORIS fajla
+    def read_nalozi_mesec_godina(self, mesec, godina):
+        try:
+            select_columns = "nalogID, broj, datum, vrsta, datum_knjizenja, proknjizen"
+            condition1 = "EXTRACT(YEAR FROM datum)"
+            value1 = godina
+            condition2 = "EXTRACT(MONTH FROM datum)"
+            value2 = int(mesec)
+            condition3 = "proknjizen"
+            value3 = 'da'
+            order = "datum"
+            connection = Database()
+            sve_stavke = connection.select_three_where_oris(self.tablename, select_columns, condition1, value1, condition2, value2, condition3, value3, order)
+            return sve_stavke
+        except Error as e:
+            Greske("Pronalazenje u bazi spiska naloga sa podacima proba - ovo ide u ORIS fajl- NaloziController ", e)
+
     def read_nalozi_oris(self, godina):
         try:
             select_columns = "nalog.nalogID, nalog.broj, nalog.datum, nalog.vrsta, nalog.proknjizen, "

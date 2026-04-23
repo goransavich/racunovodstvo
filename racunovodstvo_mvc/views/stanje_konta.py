@@ -73,8 +73,6 @@ class StanjeKonta:
             count_stavke_naloga += 1
 
     def prikazi(self):
-        # ovo cu aktivirati kada budem uradio automatiku za zavrsni racun
-        #self.dugme_formiranje_zavrsni_racun.config(state='disabled')
         pocetni = self.datum_od.get_date()
         krajnji = self.datum_do.get_date()
         pocetna_godina = pocetni.year
@@ -98,6 +96,7 @@ class StanjeKonta:
             self.dugme_formiranje_zavrsni_racun.config(state='normal')
         '''
 
+    '''
     def export_u_excel(self):
         podaci_za_excel = self.podaci_tabela.get()
         if podaci_za_excel == '':
@@ -116,6 +115,66 @@ class StanjeKonta:
                 os.startfile('stanje_konta.xlsx')
             except OSError:
                 messagebox.showinfo("Upozorenje", "Proverite da li imate instaliran Microsoft Excel ili zatvorite prethodno otvoren excel dokument!", parent=self.prozor_stanje_konta)
+    '''
+    def export_u_excel(self):
+        podaci_za_excel = self.podaci_tabela.get()
+        pocetni = self.datum_od.get_date()
+        pocetni_datum_str = pocetni.strftime("%d.%m.%Y.")
+        krajnji = self.datum_do.get_date()
+        krajnji_datum_str = krajnji.strftime("%d.%m.%Y.")
+        if podaci_za_excel == '':
+            messagebox.showinfo("Greška", "Niste izabrali podatke!", parent=self.prozor_stanje_konta)
+        else:
+            df = pd.DataFrame(eval(podaci_za_excel))
+            for column in df.columns[1:]:
+                # Ovde se pretvaraju None vrednosti iz baze u prazno, jer pandas ne moze da pretvori None u broj
+                df[column] = pd.to_numeric(df[column], errors='coerce')
+
+            # Ovde prazne vrednosti popunjava sa nulama
+            df = df.fillna(0)
+            try:
+                df.columns = ['Oznaka', 'Duguje', 'Potražuje', 'Saldo']
+                # Snimanje u Excel sa formatiranjem
+                with pd.ExcelWriter("stanje_konta.xlsx", engine="xlsxwriter") as writer:
+                    df.to_excel(writer, sheet_name="Sheet1", startrow=2,index=False)
+                    # Dobijanje workbook i worksheet objekata
+                    workbook = writer.book
+                    worksheet = writer.sheets["Sheet1"]
+
+                    # Definisanje formata sa dve decimale
+                    format_dve_decimale = workbook.add_format({"num_format": "#,##0.00"})
+
+                    # Format zaglavlja sa bojom #99c7f7
+                    format_header = workbook.add_format({
+                        "bold": True,
+                        "bg_color": "#99c7f7",
+                        "align": "center",
+                        "valign": "vcenter"
+                    })
+
+                    # Format naslova
+                    format_title = workbook.add_format({
+                        "bold": True,
+                        "font_size": 12,
+                        "align": "center",
+                        "valign": "vcenter"
+                    })
+
+                    # Naslov u prvom redu (spajanje ćelija A1:D1)
+                    worksheet.merge_range("A1:D1", "STANJE KONTA od " + pocetni_datum_str + " do " + krajnji_datum_str, format_title)
+
+                    # Primena formata na kolonu "Vrednost"
+                    worksheet.set_column('B:D', 18, format_dve_decimale)
+
+                    for i, col in enumerate(df.columns):
+                        max_len = max(df[col].astype(str).map(len).max(), len(col))
+                        worksheet.set_column(i, i, max_len + 2, format_dve_decimale if col != "Oznaka" else None)
+                        worksheet.write(2, i, col, format_header)  # zaglavlje sada ide u treći red (indeks 2)
+
+                os.startfile('stanje_konta.xlsx')
+            except OSError:
+                messagebox.showinfo("Upozorenje", "Proverite da li imate instaliran Microsoft Excel ili zatvorite prethodno otvoren excel dokument!", parent=self.prozor_stanje_konta)
+
 
     def formiraj_json(self):
         podaci = self.podaci_tabela.get()

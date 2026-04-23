@@ -288,6 +288,7 @@ class Sistem:
         self.entry_polja_organizacija.rowconfigure(7, weight=1)
         self.entry_polja_organizacija.rowconfigure(8, weight=1)
         self.entry_polja_organizacija.rowconfigure(9, weight=1)
+        self.entry_polja_organizacija.rowconfigure(10, weight=1)
 
         # Label i polje za unos naziva organizacije
         self.naziv_organizacije_label = Label(self.entry_polja_organizacija, text="Naziv organizacije:")
@@ -322,39 +323,39 @@ class Sistem:
 
         # Label i polje za sifre programa
         self.program_label = Label(self.entry_polja_organizacija, text="Šifra programa:")
-        self.program_label.grid(row=4, column=0, padx=10, sticky='w')
+        self.program_label.grid(row=5, column=0, padx=10, sticky='w')
         self.program_entry = Entry(self.entry_polja_organizacija)
-        self.program_entry.grid(row=4, column=1, padx=10, sticky='ew')
+        self.program_entry.grid(row=5, column=1, padx=10, sticky='ew')
 
         # Label i polje za sifre projekta
         self.projekat_label = Label(self.entry_polja_organizacija, text="Šifra projekta:")
-        self.projekat_label.grid(row=5, column=0, padx=10, sticky='w')
+        self.projekat_label.grid(row=6, column=0, padx=10, sticky='w')
         self.projekat_entry = Entry(self.entry_polja_organizacija)
-        self.projekat_entry.grid(row=5, column=1, padx=10, sticky='ew')
+        self.projekat_entry.grid(row=6, column=1, padx=10, sticky='ew')
 
         # Label i polje za sifre funkcionalne klasifikacije
         self.funkcionalna_label = Label(self.entry_polja_organizacija, text="Funkcionalna klasifikacija:")
-        self.funkcionalna_label.grid(row=6, column=0, padx=10, sticky='w')
+        self.funkcionalna_label.grid(row=7, column=0, padx=10, sticky='w')
         self.funkcionalna_entry = Entry(self.entry_polja_organizacija)
-        self.funkcionalna_entry.grid(row=6, column=1, padx=10, sticky='ew')
+        self.funkcionalna_entry.grid(row=7, column=1, padx=10, sticky='ew')
 
         # Label i polje za sifre valute
         self.valuta_label = Label(self.entry_polja_organizacija, text="Šifra valute:")
-        self.valuta_label.grid(row=7, column=0, padx=10, sticky='w')
+        self.valuta_label.grid(row=8, column=0, padx=10, sticky='w')
         self.valuta_entry = Entry(self.entry_polja_organizacija)
-        self.valuta_entry.grid(row=7, column=1, padx=10, sticky='ew')
+        self.valuta_entry.grid(row=8, column=1, padx=10, sticky='ew')
 
         # Label i polje za sifru trezora
         self.trezor_label = Label(self.entry_polja_organizacija, text="Šifra trezora:")
-        self.trezor_label.grid(row=8, column=0, padx=10, sticky='w')
+        self.trezor_label.grid(row=9, column=0, padx=10, sticky='w')
         self.trezor_entry = Entry(self.entry_polja_organizacija)
-        self.trezor_entry.grid(row=8, column=1, padx=10, sticky='ew')
+        self.trezor_entry.grid(row=9, column=1, padx=10, sticky='ew')
 
         # Label i polje za ime i prezime knjigovodje
         self.racunovodja_label = Label(self.entry_polja_organizacija, text="Računovodja (ime i prezime):")
-        self.racunovodja_label.grid(row=9, column=0, padx=10, sticky='w')
+        self.racunovodja_label.grid(row=10, column=0, padx=10, sticky='w')
         self.racunovodja_entry = Entry(self.entry_polja_organizacija)
-        self.racunovodja_entry.grid(row=9, column=1, padx=10, sticky='ew')
+        self.racunovodja_entry.grid(row=10, column=1, padx=10, sticky='ew')
 
         # Drugi frame za dugmad Dodaj, Izmeni, Obrisi i Izaberi
         self.polje_dugmad_organizacija = LabelFrame(self.prozor_podaci_organizacija, text="Komande", bg="lightblue")
